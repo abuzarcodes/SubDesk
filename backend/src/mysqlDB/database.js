@@ -15,9 +15,4 @@ async function connectDB() {
   }
 }
 
-async function fetchAllUsers() {
-  const [results] = await DB.execute("select * from users;");
-  return results;
-}
-
-export { fetchAllUsers, connectDB };
+export { connectDB, DB };
