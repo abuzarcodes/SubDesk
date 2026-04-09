@@ -6,6 +6,8 @@ import cors from "cors";
 import authRoutes from "./routes/users.routes.js";
 import planRoutes from "./routes/plans.routes.js";
 import subscriptionRoutes from "./routes/subscriptions.routes.js";
+import publicRoutes from "./routes/public.routes.js";
+import configRoutes from "./routes/config.routes.js";
 
 dotenv.config();
 const app = express();
@@ -28,6 +30,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/public", publicRoutes);
+app.use("/api/business", configRoutes);
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
