@@ -7,11 +7,11 @@ async function connectDB() {
       host: process.env.DATABASE_HOST,
       user: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
-      database: "subtrckrdb",
+      database: process.env.DATABASE_NAME,
     });
     console.log("database connected successfully");
   } catch (error) {
-    console.log("cant connect to database" + error);
+    console.log("cant connect to database: " + error);
   }
 }
 

@@ -2,30 +2,39 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { DB } from "../mysqlDB/database.js";
 
-async function fetchAllUsers(req, res, next) {
-  const [results] = await DB.execute(
-    "select id,username,email,role,created_at from users;",
-  );
-  return results;
+async function fetchAllUsers(req, res) {
+  try {
+    const [results] = await DB.execute(
+      "SELECT id, username, email, role, created_at FROM users;"
+    );
+    return res.status(200).json(results);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error });
+  }
 }
 
-async function registerUser(req, res, next) {
-  const { username, email, password } = req.body;
+async function registerUser(req, res) {
+  const { username, email, password, role } = req.body;
+
   if (!username || !email || !password) {
-    return res.status(401).json({ message: "all fields are required" });
+    return res.status(400).json({ message: "All fields are required" });
   }
+
+  const userRole = role === "business" ? "business" : "customer";
   const hashedPassword = await bcrypt.hash(password, 10);
+
   try {
     await DB.execute(
-      `INSERT INTO users (username, email, password, role) 
-     VALUES (?, ?, ?, ?)`,
-      [username, email, hashedPassword, "user"],
+      `INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`,
+      [username, email, hashedPassword, userRole]
     );
+
     const [row] = await DB.execute(
-      `select id,username,email,role from users where email=?`,
-      [email],
+      `SELECT id, username, email, role FROM users WHERE email = ?`,
+      [email]
     );
     const user = row[0];
+
     const token = jwt.sign(
       {
         id: user.id,
@@ -34,18 +43,25 @@ async function registerUser(req, res, next) {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: 10000 },
+      { expiresIn: "7d" }
     );
 
-    res.cookie("userToken", token);
-    res.status(200).json({ message: "registration successful" });
-    return next();
+    res.cookie("userToken", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(201).json({ message: "Registration successful", user });
   } catch (error) {
-    return res.send(error);
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+    return res.status(500).json({ message: "Server error", error });
   }
 }
 
-async function userLogin(req, res, next) {
+async function userLogin(req, res) {
   try {
     const { email, password } = req.body;
 
@@ -56,8 +72,8 @@ async function userLogin(req, res, next) {
     }
 
     const [rows] = await DB.execute(
-      "SELECT id, email, password, role FROM users WHERE email = ?",
-      [email],
+      "SELECT id, username, email, password, role FROM users WHERE email = ?",
+      [email]
     );
 
     if (rows.length === 0) {
@@ -65,7 +81,6 @@ async function userLogin(req, res, next) {
     }
 
     const user = rows[0];
-
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -80,26 +95,37 @@ async function userLogin(req, res, next) {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: 10000 },
+      { expiresIn: "7d" }
     );
 
-    res.cookie("userToken", token);
-    res.status(200).json({
-      message: "Login successful",
+    res.cookie("userToken", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return next();
+
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
 }
 
-// async function fetchUser(req,res,next) {
-//   const [result] = await DB.execute(
-//     `select id,username,email,role,created_at form users where id=?`,
-//     [userID],
-//   );
+async function getMe(req, res) {
+  return res.status(200).json({ user: req.user });
+}
 
-//   return result;
-// }
-export { fetchAllUsers, registerUser, userLogin };
+async function logoutUser(req, res) {
+  res.clearCookie("userToken");
+  return res.status(200).json({ message: "Logged out successfully" });
+}
+
+export { fetchAllUsers, registerUser, userLogin, getMe, logoutUser };

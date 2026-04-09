@@ -1,10 +1,10 @@
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
 function auth(req, res, next) {
   const token = req.cookies.userToken;
   if (!token) {
     return res.status(401).json({
-      massage: "not authorized",
+      message: "not authorized",
     });
   }
   try {
@@ -14,9 +14,9 @@ function auth(req, res, next) {
   } catch (error) {
     return res.status(401).json({
       error: error,
-      massage: "not authorized",
+      message: "not authorized",
     });
   }
 }
 
-export {auth}
+export { auth };

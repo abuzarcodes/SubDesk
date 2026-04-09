@@ -1,23 +1,34 @@
-import express, { json } from "express";
+import express from "express";
 import { connectDB } from "./mysqlDB/database.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import userRoutes from './routes/users.routes.js'
+import cors from "cors";
+import authRoutes from "./routes/users.routes.js";
+import planRoutes from "./routes/plans.routes.js";
+import subscriptionRoutes from "./routes/subscriptions.routes.js";
 
 dotenv.config();
 const app = express();
 connectDB();
 
+// Middleware
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Routes
 app.get("/", (req, res) => {
-  res.send("hello");
+  res.send("SubTrckr API is running");
 });
 
-app.use("/api/user",userRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 app.listen(process.env.PORT, () => {
-  console.log("server running on port 3000");
+  console.log(`Server running on port ${process.env.PORT}`);
 });
