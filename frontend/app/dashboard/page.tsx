@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,18 +40,22 @@ export default function DashboardPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [plansData, subsData] = await Promise.all([
+      const [plansData, subsData, configData] = await Promise.all([
         apiClient.getMyPlans(),
         apiClient.getBusinessSubscriptions(),
+        apiClient.getPageConfig()
       ]);
       setPlans(plansData);
       setSubscriptions(subsData);
+      setProfile(configData.profile);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
+
+  const publicIdentifier = profile?.slug || user?.id;
 
   const handleCreatePlan = async (data: Partial<Plan>) => {
     setIsSaving(true);
@@ -133,7 +138,7 @@ export default function DashboardPage() {
               </p>
               <div className="flex gap-2">
                 <code className="flex-1 rounded-lg bg-muted/50 px-4 py-2 text-sm text-foreground break-all">
-                  {`${typeof window !== 'undefined' ? window.location.origin : ''}/subscribe/${user?.id}`}
+                  {`${typeof window !== 'undefined' ? window.location.origin : ''}/subscribe/${publicIdentifier}`}
                 </code>
                 <Button
                   variant="outline"

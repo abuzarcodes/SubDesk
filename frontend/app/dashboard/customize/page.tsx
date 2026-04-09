@@ -5,14 +5,21 @@ import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { apiClient, PageConfigResponse } from '@/lib/api';
 import { PageConfig, DEFAULT_CONFIG } from '@/lib/theme';
+import { cn } from '@/lib/utils';
 import { Navbar } from '@/components/navbar';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RotateCcw, Save, Globe, EyeOff } from 'lucide-react';
+import { RotateCcw, Save, Globe, EyeOff, ChevronDown } from 'lucide-react';
 
 // Custom debounce hook for iframe messages
 function useDebounce<T>(value: T, delay: number): T {
@@ -26,13 +33,380 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-const COLOR_PRESETS = [
-  { name: 'Default', primary: '#000000', background: '#ffffff', accent: '#000000', text: '#000000' },
-  { name: 'Pro Blue', primary: '#3b82f6', background: '#ffffff', accent: '#2563eb', text: '#1e293b' },
-  { name: 'Midnight', primary: '#60a5fa', background: '#0f172a', accent: '#3b82f6', text: '#f8fafc' },
-  { name: 'Emerald', primary: '#10b981', background: '#f8fafc', accent: '#059669', text: '#0f172a' },
-  { name: 'Sunset', primary: '#f43f5e', background: '#fff1f2', accent: '#e11d48', text: '#4c0519' },
-  { name: 'Purple Rain', primary: '#8b5cf6', background: '#f5f3ff', accent: '#7c3aed', text: '#2e1065' },
+const DETAILED_PRESETS: { name: string; config: Partial<PageConfig> }[] = [
+  {
+    name: 'Morphic Glass',
+    config: {
+      theme: {
+        mode: 'dark',
+        colors: {
+          primary: 'oklch(0.65 0.25 280)', // Vibrant Purple
+          accent: 'oklch(0.7 0.2 200)',   // Cyan
+          background: 'oklch(0.15 0.02 280)', // Deep Dark
+          text: 'oklch(0.98 0.01 280)',
+          card: 'oklch(0.2 0.03 280)',
+          muted: 'oklch(0.5 0.03 280)',
+          border: 'oklch(0.3 0.03 280)',
+        },
+        font: 'display',
+        radius: '1.25rem',
+        shadow: 'xl',
+      },
+      layout: { type: 'grid', columns: 2 },
+      components: { cardStyle: 'glass', buttonStyle: 'pill', highlightPopular: 1 }
+    }
+  },
+  {
+    name: 'Minimalist Mono',
+    config: {
+      theme: {
+        mode: 'light',
+        colors: {
+          primary: '#000000',
+          accent: '#475569',
+          background: '#ffffff',
+          text: '#000000',
+          card: '#ffffff',
+          muted: '#94a3b8',
+          border: '#e2e8f0',
+        },
+        font: 'sans',
+        radius: '0px',
+        shadow: 'none',
+      },
+      layout: { type: 'grid', columns: 2 },
+      components: { cardStyle: 'outlined', buttonStyle: 'sharp' }
+    }
+  },
+  {
+    name: 'Midnight Glow',
+    config: {
+      theme: {
+        mode: 'dark',
+        colors: {
+          primary: '#22d3ee', // Cyan
+          accent: '#818cf8',  // Indigo
+          background: '#020617', // Slate 950
+          text: '#f8fafc',
+          card: '#0f172a',
+          muted: '#64748b',
+          border: '#1e293b',
+        },
+        font: 'mono',
+        radius: '0.75rem',
+        shadow: 'lg',
+      },
+      layout: { type: 'grid', columns: 2 },
+      components: { cardStyle: 'solid', buttonStyle: 'rounded' }
+    }
+  },
+  {
+    name: 'Sunset Vibrant',
+    config: {
+      theme: {
+        mode: 'light',
+        colors: {
+          primary: '#f43f5e', // Rose
+          accent: '#f59e0b',  // Amber
+          background: '#fff1f2',
+          text: '#4c0519',
+          card: '#ffffff',
+          muted: '#fb7185',
+          border: '#ffe4e6',
+        },
+        font: 'serif',
+        radius: '1rem',
+        shadow: 'md',
+      },
+      layout: { type: 'grid', columns: 2 },
+      components: { cardStyle: 'solid', buttonStyle: 'pill' }
+    }
+  },
+  {
+    name: 'Enterprise Pro',
+    config: {
+      theme: {
+        mode: 'light',
+        colors: {
+          primary: '#2563eb', // Blue
+          accent: '#0f172a',
+          background: '#f8fafc',
+          text: '#0f172a',
+          card: '#ffffff',
+          muted: '#64748b',
+          border: '#e2e8f0',
+        },
+        font: 'sans',
+        radius: '0.5rem',
+        shadow: 'sm',
+      },
+      layout: { type: 'grid', columns: 2 },
+      components: { cardStyle: 'outlined', buttonStyle: 'rounded' }
+    }
+  },{
+  name: 'Neon Cyberpunk',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#ff00ff',
+        accent: '#00ffff',
+        background: '#0a0a0a',
+        text: '#e5e5e5',
+        card: '#111111',
+        muted: '#888888',
+        border: '#222222',
+      },
+      font: 'mono',
+      radius: '1rem',
+      shadow: 'xl',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'glass', buttonStyle: 'pill', highlightPopular: 0 }
+  }
+},
+{
+  name: 'Soft Pastel',
+  config: {
+    theme: {
+      mode: 'light',
+      colors: {
+        primary: '#a78bfa',
+        accent: '#fbcfe8',
+        background: '#fef9ff',
+        text: '#4c1d95',
+        card: '#ffffff',
+        muted: '#d8b4fe',
+        border: '#f3e8ff',
+      },
+      font: 'sans',
+      radius: '1.5rem',
+      shadow: 'md',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'rounded' }
+  }
+},
+{
+  name: 'Luxury Gold',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#d4af37',
+        accent: '#f5deb3',
+        background: '#0f0f0f',
+        text: '#f5f5dc',
+        card: '#1a1a1a',
+        muted: '#a3a3a3',
+        border: '#2a2a2a',
+      },
+      font: 'serif',
+      radius: '0.75rem',
+      shadow: 'lg',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'outlined', buttonStyle: 'pill', highlightPopular: 1 }
+  }
+},
+{
+  name: 'Ocean Breeze',
+  config: {
+    theme: {
+      mode: 'light',
+      colors: {
+        primary: '#0284c7',
+        accent: '#22d3ee',
+        background: '#f0f9ff',
+        text: '#0c4a6e',
+        card: '#ffffff',
+        muted: '#7dd3fc',
+        border: '#e0f2fe',
+      },
+      font: 'sans',
+      radius: '1rem',
+      shadow: 'md',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'rounded' }
+  }
+},
+{
+  name: 'Forest Nature',
+  config: {
+    theme: {
+      mode: 'light',
+      colors: {
+        primary: '#166534',
+        accent: '#4ade80',
+        background: '#f0fdf4',
+        text: '#14532d',
+        card: '#ffffff',
+        muted: '#86efac',
+        border: '#dcfce7',
+      },
+      font: 'serif',
+      radius: '1rem',
+      shadow: 'sm',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'rounded' }
+  }
+},
+{
+  name: 'Dark Minimal Pro',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#ffffff',
+        accent: '#9ca3af',
+        background: '#000000',
+        text: '#ffffff',
+        card: '#111111',
+        muted: '#6b7280',
+        border: '#1f2937',
+      },
+      font: 'sans',
+      radius: '0.25rem',
+      shadow: 'none',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'outlined', buttonStyle: 'sharp' }
+  }
+},
+{
+  name: 'Aurora Gradient',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#22c55e',
+        accent: '#3b82f6',
+        background: '#020617',
+        text: '#f1f5f9',
+        card: '#0f172a',
+        muted: '#64748b',
+        border: '#1e293b',
+      },
+      font: 'display',
+      radius: '1.25rem',
+      shadow: 'xl',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'glass', buttonStyle: 'pill' }
+  }
+},
+{
+  name: 'Warm Coffee',
+  config: {
+    theme: {
+      mode: 'light',
+      colors: {
+        primary: '#6f4e37',
+        accent: '#d6a77a',
+        background: '#fdf6ec',
+        text: '#3e2723',
+        card: '#ffffff',
+        muted: '#bcaaa4',
+        border: '#efebe9',
+      },
+      font: 'serif',
+      radius: '1rem',
+      shadow: 'md',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'pill' }
+  }
+},
+{
+  name: 'Electric Lime',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#a3e635',
+        accent: '#bef264',
+        background: '#020617',
+        text: '#ecfccb',
+        card: '#111827',
+        muted: '#4d7c0f',
+        border: '#1f2937',
+      },
+      font: 'mono',
+      radius: '0.75rem',
+      shadow: 'lg',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'glass', buttonStyle: 'rounded' }
+  }
+},
+{
+  name: 'Royal Purple',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#7c3aed',
+        accent: '#c084fc',
+        background: '#1e1b4b',
+        text: '#ede9fe',
+        card: '#2e1065',
+        muted: '#a78bfa',
+        border: '#4c1d95',
+      },
+      font: 'serif',
+      radius: '1rem',
+      shadow: 'lg',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'pill', highlightPopular: 0 }
+  }
+},
+{
+  name: 'Glass Frost',
+  config: {
+    theme: {
+      mode: 'light',
+      colors: {
+        primary: '#38bdf8',
+        accent: '#e0f2fe',
+        background: '#f8fafc',
+        text: '#0f172a',
+        card: '#ffffff',
+        muted: '#94a3b8',
+        border: '#e2e8f0',
+      },
+      font: 'display',
+      radius: '1.5rem',
+      shadow: 'xl',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'glass', buttonStyle: 'rounded' }
+  }
+},
+{
+  name: 'Crimson Bold',
+  config: {
+    theme: {
+      mode: 'dark',
+      colors: {
+        primary: '#dc2626',
+        accent: '#f87171',
+        background: '#1f0000',
+        text: '#fee2e2',
+        card: '#2b0000',
+        muted: '#b91c1c',
+        border: '#450a0a',
+      },
+      font: 'display',
+      radius: '0.75rem',
+      shadow: 'xl',
+    },
+    layout: { type: 'grid', columns: 2 },
+    components: { cardStyle: 'solid', buttonStyle: 'pill', highlightPopular: 1 }
+  }
+}
 ];
 
 export default function CustomizePage() {
@@ -166,18 +540,25 @@ export default function CustomizePage() {
     }
   };
 
-  const applyPreset = (preset: typeof COLOR_PRESETS[0]) => {
+  const applyPreset = (preset: typeof DETAILED_PRESETS[0]) => {
     setDraftConfig(prev => ({
       ...prev,
+      ...preset.config,
       theme: {
         ...prev.theme,
+        ...(preset.config.theme || {}),
         colors: {
           ...prev.theme.colors,
-          primary: preset.primary,
-          background: preset.background,
-          accent: (preset as any).accent || preset.primary,
-          text: (preset as any).text || prev.theme.colors.text,
+          ...(preset.config.theme?.colors || {})
         }
+      },
+      layout: {
+        ...prev.layout,
+        ...(preset.config.layout || {})
+      },
+      components: {
+        ...prev.components,
+        ...(preset.config.components || {})
       }
     }));
     toast.info(`Applied ${preset.name} preset`);
@@ -219,22 +600,59 @@ export default function CustomizePage() {
             
             {/* Theme Section */}
             <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider">Theme</h3>
-                <Select onValueChange={(val) => {
-                  const preset = COLOR_PRESETS.find(p => p.name === val);
-                  if (preset) applyPreset(preset);
-                }}>
-                  <SelectTrigger className="w-[120px] h-8 text-xs">
-                    <SelectValue placeholder="Presets" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COLOR_PRESETS.map(p => (
-                      <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
+              <Collapsible defaultOpen>
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between cursor-pointer group mb-4">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider group-hover:text-primary transition-colors flex items-center gap-2">
+                        Premium Presets
+                        <Badge variant="secondary" className="text-[9px] h-4 bg-indigo-100 text-indigo-700 border-none px-1.5">PRO</Badge>
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground italic">Instant one-click professional styles</p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    {DETAILED_PRESETS.map(p => (
+                      <button
+                        key={p.name}
+                        onClick={() => applyPreset(p)}
+                        className={cn(
+                          "group relative flex flex-col items-start p-3 rounded-xl border transition-all hover:shadow-md",
+                          draftConfig.theme.colors.primary === p.config.theme?.colors?.primary 
+                            ? "border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500" 
+                            : "border-border bg-card hover:border-indigo-300"
+                        )}
+                      >
+                        <div className="flex gap-1 mb-2">
+                          <div 
+                            className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
+                            style={{ backgroundColor: p.config.theme?.colors?.primary }}
+                          />
+                          <div 
+                            className="w-4 h-4 rounded-full border border-white/20 shadow-sm -ml-1.5"
+                            style={{ backgroundColor: p.config.theme?.colors?.accent }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold text-left leading-tight line-clamp-1">{p.name}</span>
+                        <div className="mt-1 flex gap-1">
+                          <span className={cn(
+                            "text-[8px] px-1 rounded uppercase font-bold",
+                            p.config.theme?.mode === 'dark' ? "bg-slate-800 text-slate-200" : "bg-white text-slate-800 border"
+                          )}>
+                            {p.config.theme?.mode}
+                          </span>
+                          <span className="text-[8px] px-1 rounded uppercase font-bold bg-indigo-100 text-indigo-700">
+                            {p.config.components?.cardStyle}
+                          </span>
+                        </div>
+                      </button>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               
               <div className="space-y-2">
                 <Label>Color Mode</Label>

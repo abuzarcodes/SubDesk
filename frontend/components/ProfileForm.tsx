@@ -150,7 +150,9 @@ export function ProfileForm({
                 />
               </div>
               <p className="text-[11px] text-slate-500 font-medium px-1">
-                Your public page will be: <span className="text-indigo-600">subtrckr.com/subscribe/{profile.slug || '{slug}'}</span>
+                Public URL: <span className="text-indigo-600">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/subscribe/{profile.slug || 'your-id'}
+                </span>
               </p>
             </div>
           </div>

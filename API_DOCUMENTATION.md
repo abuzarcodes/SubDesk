@@ -138,3 +138,66 @@ Retrieves a list of all plans the authenticated customer is currently subscribed
 - **Access**: Private (Customer role only)
 - **Responses**:
   - \`200 OK\`: Returns a combined overview including subscription status, plan name, price, and the publisher's business name.
+
+---
+
+## 4. Business & Page Configuration (\`/api/business\`)
+Endpoints for business owners to manage their public profile and subscription page appearance.
+
+### \`GET /api/business/page-config\`
+Retrieves the current draft/saved page configuration and business profile.
+- **Access**: Private (Business role only)
+- **Responses**:
+  - \`200 OK\`: Returns \`{ profile, config, isPublished }\`.
+  - \`401 Unauthorized\`: Not authenticated.
+
+### \`PUT /api/business/page-config\`
+Updates the draft customization settings for the subscription page.
+- **Access**: Private (Business role only)
+- **Request Body**:
+  \`\`\`json
+  {
+    "theme": { "colors": { "primary": "#...", ... }, "font": "sans", "radius": "...", "shadow": "..." },
+    "layout": { "type": "grid", "columns": 3 },
+    "components": { "cardStyle": "glass", "buttonStyle": "pill" }
+  }
+  \`\`\`
+- **Responses**:
+  - \`200 OK\`: Config updated.
+
+### \`PUT /api/business/profile\`
+Updates the public-facing business profile details.
+- **Access**: Private (Business role only)
+- **Request Body**:
+  \`\`\`json
+  {
+    "display_name": "Gym Pro",
+    "logo_url": "https://...",
+    "tagline": "...",
+    "support_email": "...",
+    "slug": "gym-pro"
+  }
+  \`\`\`
+- **Responses**:
+  - \`200 OK\`: Profile updated.
+
+### \`POST /api/business/page-config/publish\`
+Deploys the current draft configuration to the live public page.
+- **Access**: Private (Business role only)
+
+### \`POST /api/business/page-config/unpublish\`
+Takes the public subscription page offline.
+- **Access**: Private (Business role only)
+
+---
+
+## 5. Public Access (\`/api/public\`)
+
+### \`GET /api/public/subscribe/:identifier\`
+Fetches everything needed to render a business's subscription page.
+- **Access**: Public
+- **Parameters**: 
+  - \`identifier\`: Can be the **Business ID** (integer) or the **Custom Slug** (string).
+- **Responses**:
+  - \`200 OK\`: Returns business details, active plans, and current published configuration.
+  - \`404 Not Found\`: Business doesn't exist or page is unpublished.
