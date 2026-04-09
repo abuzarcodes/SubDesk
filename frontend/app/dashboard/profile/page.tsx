@@ -1,25 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { apiClient } from '@/lib/api';
-import type { BusinessProfile } from '@/lib/theme';
-import { ProfileForm } from '@/components/ProfileForm';
-import { ProfilePreview } from '@/components/ProfilePreview';
-import { useToast } from '@/components/ui/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState, useEffect, useCallback } from "react";
+import { apiClient } from "@/lib/api";
+import type { BusinessProfile } from "@/lib/theme";
+import { ProfileForm } from "@/components/ProfileForm";
 
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function ProfilePage() {
   const [draftProfile, setDraftProfile] = useState<BusinessProfile>({
-    display_name: '',
-    slug: '',
-    logo_url: '',
-    tagline: '',
-    support_email: '',
+    display_name: "",
+    slug: "",
+    logo_url: "",
+    tagline: "",
+    support_email: "",
   });
-  const [savedProfile, setSavedProfile] = useState<BusinessProfile | null>(null);
+  const [savedProfile, setSavedProfile] = useState<BusinessProfile | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -32,9 +34,9 @@ export default function ProfilePage() {
       setSavedProfile(data.profile);
     } catch (error: any) {
       toast({
-        title: 'Error fetching profile',
-        description: error.message || 'Something went wrong',
-        variant: 'destructive',
+        title: "Error fetching profile",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -52,9 +54,9 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!draftProfile.display_name || !draftProfile.slug) {
       toast({
-        title: 'Validation Error',
-        description: 'Business Name and Slug are required',
-        variant: 'destructive',
+        title: "Validation Error",
+        description: "Business Name and Slug are required",
+        variant: "destructive",
       });
       return;
     }
@@ -64,14 +66,14 @@ export default function ProfilePage() {
       await apiClient.updateProfile(draftProfile);
       setSavedProfile(draftProfile);
       toast({
-        title: 'Profile Saved',
-        description: 'Your business profile has been updated successfully.',
+        title: "Profile Saved",
+        description: "Your business profile has been updated successfully.",
       });
     } catch (error: any) {
       toast({
-        title: 'Error saving profile',
-        description: error.message || 'Failed to update profile.',
-        variant: 'destructive',
+        title: "Error saving profile",
+        description: error.message || "Failed to update profile.",
+        variant: "destructive",
       });
     } finally {
       setIsSaving(false);
@@ -107,15 +109,18 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-2xl">
       <div className="mb-6">
-        <Link 
-          href="/dashboard" 
+        <Link
+          href="/dashboard"
           className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors group"
         >
-          <ArrowLeft size={16} className="mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft
+            size={16}
+            className="mr-2 group-hover:-translate-x-1 transition-transform"
+          />
           Back to Dashboard
         </Link>
       </div>
-      
+
       <ProfileForm
         profile={draftProfile}
         onUpdate={handleUpdate}
