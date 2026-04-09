@@ -8,13 +8,13 @@ export const getPageConfig = async (req, res) => {
     const [profiles] = await DB.query(`SELECT * FROM business_profiles WHERE business_id = ?`, [businessId]);
     const [configs] = await DB.query(`SELECT * FROM page_configs WHERE business_id = ?`, [businessId]);
 
-    if (profiles.length === 0 || configs.length === 0) {
-      return res.status(404).json({ message: "Profile or Config not found" });
+    if (profiles.length === 0) {
+      return res.status(404).json({ message: "Profile not found" });
     }
 
     return res.status(200).json({
       profile: profiles[0],
-      config: configs[0]
+      config: configs.length > 0 ? configs[0] : {}
     });
   } catch (error) {
     console.error("Error fetching config:", error);

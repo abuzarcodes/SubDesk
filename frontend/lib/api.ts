@@ -30,6 +30,8 @@ export interface BusinessWithPlans {
   plans: Plan[];
 }
 
+import type { PageConfig, BusinessProfile } from './theme';
+
 export interface Subscription {
   id: number;
   status: string;
@@ -38,6 +40,28 @@ export interface Subscription {
   business_name: string;
   customer_name?: string;
   customer_email?: string;
+}
+
+export interface PublicPageData {
+  business: {
+    id: number;
+    display_name: string;
+    logo_url?: string;
+    tagline?: string;
+    support_email?: string;
+  };
+  plans: Plan[];
+  config: PageConfig;
+}
+
+export interface PageConfigResponse {
+  profile: BusinessProfile;
+  config: {
+    theme: any;
+    layout: any;
+    components: any;
+    is_published: boolean;
+  };
 }
 
 class ApiClient {
@@ -148,6 +172,46 @@ class ApiClient {
   async getMySubscriptions() {
     return this.request<Subscription[]>('/subscriptions/customer', {
       method: 'GET',
+    });
+  }
+
+  // Public Custom Subscription Page endpoint
+  async getPublicSubscribePage(identifier: string) {
+    return this.request<PublicPageData>(`/public/subscribe/${identifier}`, {
+      method: 'GET',
+    });
+  }
+
+  // Customization Dashboard endpoints
+  async getPageConfig() {
+    return this.request<PageConfigResponse>('/business/page-config', {
+      method: 'GET',
+    });
+  }
+
+  async updatePageConfig(config: PageConfig) {
+    return this.request('/business/page-config', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  async updateProfile(data: Partial<BusinessProfile>) {
+    return this.request('/business/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async publishPageConfig() {
+    return this.request('/business/page-config/publish', {
+      method: 'POST',
+    });
+  }
+
+  async unpublishPageConfig() {
+    return this.request('/business/page-config/unpublish', {
+      method: 'POST',
     });
   }
 }

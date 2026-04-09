@@ -10,7 +10,7 @@ import { PlansList } from '@/components/plans-list';
 import { CustomersList } from '@/components/customers-list';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Subscription } from '@/lib/api';
@@ -113,9 +113,15 @@ export default function DashboardPage() {
       <Navbar />
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
-          <div className="mb-8 space-y-4">
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your subscription plans and customers</p>
+          <div className="mb-8 space-y-4 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground">Manage your subscription plans and customers</p>
+            </div>
+            <Button onClick={() => router.push('/dashboard/customize')} className="gap-2">
+              <Palette className="h-4 w-4" />
+              Customize Page
+            </Button>
           </div>
 
           {/* Share Link */}

@@ -17,17 +17,17 @@ export const getPublicSubscriptionPage = async (req, res) => {
     // Using a JOIN to get profile, config, and check user role simultaneously
     let query = `
       SELECT 
-        bp.business_id, bp.display_name, bp.logo_url, bp.tagline, bp.support_email,
+        u.id AS business_id, bp.display_name, bp.logo_url, bp.tagline, bp.support_email, bp.slug,
         pc.theme, pc.layout, pc.components
-      FROM business_profiles bp
-      JOIN page_configs pc ON bp.business_id = pc.business_id
-      JOIN users u ON bp.business_id = u.id
-      WHERE u.role = 'business' AND bp.is_active = TRUE AND pc.is_published = TRUE
+      FROM users u
+      LEFT JOIN business_profiles bp ON u.id = bp.business_id
+      LEFT JOIN page_configs pc ON u.id = pc.business_id
+      WHERE u.role = 'business' AND (pc.is_published IS NULL OR pc.is_published = TRUE)
     `;
     let queryParams = [];
 
     if (businessId) {
-      query += ` AND bp.business_id = ?`;
+      query += ` AND u.id = ?`;
       queryParams.push(businessId);
     } else {
       query += ` AND bp.slug = ?`;
@@ -59,11 +59,11 @@ export const getPublicSubscriptionPage = async (req, res) => {
         support_email: data.support_email
       },
       plans: plans,
-      config: {
+      config: data.theme ? {
         theme: data.theme,
         layout: data.layout,
         components: data.components
-      }
+      } : null
     });
   } catch (error) {
     console.error("Error fetching public subscription page:", error);

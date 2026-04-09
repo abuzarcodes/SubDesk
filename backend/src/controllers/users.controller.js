@@ -35,6 +35,22 @@ async function registerUser(req, res) {
     );
     const user = row[0];
 
+    if (userRole === "business") {
+      await DB.execute(
+        `INSERT INTO business_profiles (business_id, display_name) VALUES (?, ?)`,
+        [user.id, user.username]
+      );
+      
+      const defaultTheme = JSON.stringify({ mode: "light", colors: { primary: "#000000", background: "#ffffff" } });
+      const defaultLayout = JSON.stringify({ type: "grid", columns: 3 });
+      const defaultComponents = JSON.stringify({ cardStyle: "solid", buttonStyle: "rounded" });
+      
+      await DB.execute(
+        `INSERT INTO page_configs (business_id, theme, layout, components, is_published) VALUES (?, ?, ?, ?, ?)`,
+        [user.id, defaultTheme, defaultLayout, defaultComponents, true]
+      );
+    }
+
     const token = jwt.sign(
       {
         id: user.id,

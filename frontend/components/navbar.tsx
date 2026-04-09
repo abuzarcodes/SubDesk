@@ -45,6 +45,14 @@ export function Navbar() {
                   <DropdownMenuItem disabled>
                     {user.role === 'business' ? 'Business' : 'Customer'}
                   </DropdownMenuItem>
+                  {user.role === 'business' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile" className="flex items-center w-full cursor-pointer">
+                        <Menu className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
