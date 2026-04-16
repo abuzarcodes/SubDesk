@@ -47,6 +47,7 @@ export function CustomersTable({
             <TableHead>Plan</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Start Date</TableHead>
+            <TableHead>Expiration</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -64,12 +65,13 @@ export function CustomersTable({
                 <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                 <TableCell><Skeleton className="h-6 w-[80px] rounded-full" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md inline-block" /></TableCell>
               </TableRow>
             ))
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                 No customers found.
               </TableCell>
             </TableRow>

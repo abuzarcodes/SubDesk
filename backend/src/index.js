@@ -10,6 +10,7 @@ import publicRoutes from "./routes/public.routes.js";
 import configRoutes from "./routes/config.routes.js";
 import customerRoutes from "./routes/customers.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import { startExpireSubscriptionsJob } from "./jobs/expireSubscriptions.job.js";
 
 dotenv.config();
 const app = express();
@@ -40,4 +41,5 @@ app.use("/api/analytics", analyticsRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
+  startExpireSubscriptionsJob();
 });

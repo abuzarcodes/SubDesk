@@ -1,5 +1,48 @@
 import { DB } from "../mysqlDB/database.js";
 
+/**
+ * Helper to calculate expiration date based on billing cycle
+ */
+function calculateExpiry(billingCycle) {
+  const now = new Date();
+  const expiry = new Date(now);
+
+  if (billingCycle === "monthly") {
+    expiry.setDate(expiry.getDate() + 30);
+  } else if (billingCycle === "yearly") {
+    expiry.setDate(expiry.getDate() + 365);
+  }
+
+  return expiry;
+}
+
+/**
+ * Lazy-update helper to synchronize database status for expired subscriptions.
+ * Works on a batch of subscription objects already containing 'expires_at' or 'computed_status'.
+ */
+async function syncExpiredSubscriptions(subscriptions) {
+  try {
+    const expiredIds = subscriptions
+      .filter((sub) => {
+        const isExpiredByDate = sub.expires_at && new Date(sub.expires_at) < new Date();
+        const isNotYetMarked = sub.status !== "expired";
+        return isExpiredByDate && isNotYetMarked;
+      })
+      .map((sub) => sub.id);
+
+    if (expiredIds.length > 0) {
+      await DB.query(
+        `UPDATE subscriptions SET status = 'expired' WHERE id IN (?)`,
+        [expiredIds]
+      );
+      console.log(`Lazy-sync: Marked ${expiredIds.length} subscriptions as expired.`);
+    }
+  } catch (error) {
+    console.error("syncExpiredSubscriptions error:", error.message);
+    // Non-blocking: we don't throw or return error to the user
+  }
+}
+
 async function createSubscription(req, res) {
   try {
     if (req.user.role !== "customer") {
@@ -13,14 +56,16 @@ async function createSubscription(req, res) {
     }
 
     // Verify the plan exists and belongs to the business
-    const [plan] = await DB.execute(
-      `SELECT id, name, price FROM plans WHERE id = ? AND business_id = ?`,
+    const [planRows] = await DB.execute(
+      `SELECT id, name, price, billing_cycle FROM plans WHERE id = ? AND business_id = ?`,
       [plan_id, business_id]
     );
 
-    if (plan.length === 0) {
+    if (planRows.length === 0) {
       return res.status(404).json({ message: "Plan not found" });
     }
+
+    const plan = planRows[0];
 
     // Check if customer already has an active subscription to this plan
     const [existing] = await DB.execute(
@@ -32,14 +77,22 @@ async function createSubscription(req, res) {
       return res.status(409).json({ message: "You are already subscribed to this plan" });
     }
 
+    const expiresAt = calculateExpiry(plan.billing_cycle);
+
     const [result] = await DB.execute(
-      `INSERT INTO subscriptions (customer_id, plan_id, business_id, start_date, status) VALUES (?, ?, ?, CURDATE(), 'active')`,
-      [req.user.id, plan_id, business_id]
+      `INSERT INTO subscriptions (customer_id, plan_id, business_id, start_date, status, expires_at) VALUES (?, ?, ?, CURDATE(), 'active', ?)`,
+      [req.user.id, plan_id, business_id, expiresAt]
     );
 
     return res.status(201).json({
       message: "Subscription created successfully",
-      subscription: { id: result.insertId, plan_id, business_id, status: "active" },
+      subscription: {
+        id: result.insertId,
+        plan_id,
+        business_id,
+        status: "active",
+        expires_at: expiresAt,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -54,7 +107,11 @@ async function getBusinessSubscriptions(req, res) {
     }
 
     const [subscriptions] = await DB.execute(
-      `SELECT s.id, s.start_date, s.status, s.created_at,
+      `SELECT s.id, s.start_date, s.status, s.created_at, s.expires_at,
+              CASE 
+                WHEN s.expires_at IS NOT NULL AND s.expires_at < NOW() THEN 'expired'
+                ELSE s.status 
+              END AS computed_status,
               p.name AS plan_name, p.price AS plan_price, p.billing_cycle,
               u.username AS customer_name, u.email AS customer_email
        FROM subscriptions s
@@ -65,7 +122,18 @@ async function getBusinessSubscriptions(req, res) {
       [req.user.id]
     );
 
-    return res.status(200).json(subscriptions);
+    // Perform lazy update for any newly detected expired subs
+    if (subscriptions.length > 0) {
+      syncExpiredSubscriptions(subscriptions);
+    }
+
+    // Return subscriptions with status mapped to computed_status for the UI
+    const result = subscriptions.map(s => ({
+      ...s,
+      status: s.computed_status // Ensure backward compatibility with UI expectation of 'status'
+    }));
+
+    return res.status(200).json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -79,7 +147,11 @@ async function getCustomerSubscriptions(req, res) {
     }
 
     const [subscriptions] = await DB.execute(
-      `SELECT s.id, s.start_date, s.status, s.created_at,
+      `SELECT s.id, s.start_date, s.status, s.created_at, s.expires_at,
+              CASE 
+                WHEN s.expires_at IS NOT NULL AND s.expires_at < NOW() THEN 'expired'
+                ELSE s.status 
+              END AS computed_status,
               p.name AS plan_name, p.price AS plan_price, p.billing_cycle,
               bu.username AS business_name
        FROM subscriptions s
@@ -90,7 +162,18 @@ async function getCustomerSubscriptions(req, res) {
       [req.user.id]
     );
 
-    return res.status(200).json(subscriptions);
+    // Perform lazy update for any newly detected expired subs
+    if (subscriptions.length > 0) {
+      syncExpiredSubscriptions(subscriptions);
+    }
+
+    // Map computed_status to status for the UI
+    const result = subscriptions.map(s => ({
+      ...s,
+      status: s.computed_status
+    }));
+
+    return res.status(200).json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -157,9 +240,12 @@ async function updateSubscriptionStatus(req, res) {
       });
     }
 
-    // Fetch with ownership validation
+    // Fetch with ownership validation and plan details for expiry calculation
     const [rows] = await DB.execute(
-      `SELECT id, status FROM subscriptions WHERE id = ? AND business_id = ?`,
+      `SELECT s.id, s.status, p.billing_cycle 
+       FROM subscriptions s
+       JOIN plans p ON s.plan_id = p.id
+       WHERE s.id = ? AND s.business_id = ?`,
       [subscriptionId, req.user.id]
     );
 
@@ -180,16 +266,20 @@ async function updateSubscriptionStatus(req, res) {
     // Determine SQL update + event type
     let updateQuery;
     let eventType;
+    let updateParams = [subscriptionId];
 
     switch (action) {
       case "pause":
         updateQuery = `UPDATE subscriptions SET status = 'paused', paused_at = NOW() WHERE id = ?`;
         eventType = "paused";
         break;
-      case "resume":
-        updateQuery = `UPDATE subscriptions SET status = 'active', resumed_at = NOW(), paused_at = NULL WHERE id = ?`;
+      case "resume": {
+        const expiresAt = calculateExpiry(subscription.billing_cycle);
+        updateQuery = `UPDATE subscriptions SET status = 'active', resumed_at = NOW(), expires_at = ?, paused_at = NULL WHERE id = ?`;
+        updateParams = [expiresAt, subscriptionId];
         eventType = "resumed";
         break;
+      }
       case "cancel":
         updateQuery = `UPDATE subscriptions SET status = 'cancelled', cancelled_at = NOW() WHERE id = ?`;
         eventType = "cancelled";
@@ -199,7 +289,7 @@ async function updateSubscriptionStatus(req, res) {
     // Atomic: both update and event must succeed or both fail
     await DB.beginTransaction();
     try {
-      await DB.execute(updateQuery, [subscriptionId]);
+      await DB.execute(updateQuery, updateParams);
       await DB.execute(
         `INSERT INTO subscription_events (subscription_id, event_type) VALUES (?, ?)`,
         [subscriptionId, eventType]

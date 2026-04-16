@@ -101,6 +101,9 @@ export const CustomerRow = memo(function CustomerRow({
         <TableCell className="text-muted-foreground">
           {item.start_date ? format(new Date(item.start_date), 'MMM d, yyyy') : '-'}
         </TableCell>
+        <TableCell className="text-muted-foreground">
+          {item.expires_at ? format(new Date(item.expires_at), 'MMM d, yyyy') : '-'}
+        </TableCell>
         <TableCell className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

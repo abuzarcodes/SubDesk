@@ -114,6 +114,12 @@ export function CustomerDetailsModal({ id, isOpen, onClose, onError }: CustomerD
                     <span className="font-medium text-foreground">{format(new Date(details.subscription.start_date), 'PPP')}</span>
                   </div>
                 )}
+                {details.subscription.expires_at && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground mr-1">Expires:</span> 
+                    <span className="font-medium text-foreground">{format(new Date(details.subscription.expires_at), 'PPP')}</span>
+                  </div>
+                )}
                 {details.subscription.cancelled_at && (
                   <div className="text-sm">
                     <span className="text-muted-foreground mr-1">Cancelled:</span> 

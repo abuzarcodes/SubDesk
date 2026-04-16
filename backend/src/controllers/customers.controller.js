@@ -1,5 +1,35 @@
 import { DB } from "../mysqlDB/database.js";
 
+/**
+ * Lazy-update helper to synchronize database status for expired subscriptions.
+ */
+async function syncExpiredSubscriptions(subscriptions) {
+  try {
+    const expiredIds = subscriptions
+      .filter((sub) => {
+        // Handle both object structures (from getCustomers/export vs getCustomerDetails)
+        const expiresAt = sub.expires_at || sub.subscription?.expires_at;
+        const currentStatus = sub.status || sub.subscription?.status;
+        const id = sub.subscription_id || sub.subscription?.id;
+
+        const isExpiredByDate = expiresAt && new Date(expiresAt) < new Date();
+        const isNotYetMarked = currentStatus !== "expired";
+        return isExpiredByDate && isNotYetMarked && id;
+      })
+      .map((sub) => sub.subscription_id || sub.subscription?.id);
+
+    if (expiredIds.length > 0) {
+      await DB.query(
+        `UPDATE subscriptions SET status = 'expired' WHERE id IN (?)`,
+        [expiredIds]
+      );
+      console.log(`Lazy-sync (Customers): Marked ${expiredIds.length} subscriptions as expired.`);
+    }
+  } catch (error) {
+    console.error("syncExpiredSubscriptions error:", error.message);
+  }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
@@ -56,6 +86,10 @@ const SELECT_FIELDS = `
   s.resumed_at,
   s.cancelled_at,
   s.expires_at,
+  CASE 
+    WHEN s.expires_at IS NOT NULL AND s.expires_at < NOW() THEN 'expired'
+    ELSE s.status 
+  END AS computed_status,
   u.id          AS customer_id,
   u.username,
   u.email,
@@ -106,9 +140,20 @@ async function getCustomers(req, res) {
       params
     );
 
+    // Perform lazy update
+    if (customers.length > 0) {
+      syncExpiredSubscriptions(customers);
+    }
+
+    // Map computed_status to status
+    const result = customers.map(c => ({
+      ...c,
+      status: c.computed_status
+    }));
+
     return res.status(200).json({
       success: true,
-      data: customers,
+      data: result,
       pagination: {
         page,
         limit,
@@ -160,6 +205,9 @@ async function getCustomerDetails(req, res) {
       [subscriptionId]
     );
 
+    // Perform lazy update for the single record
+    syncExpiredSubscriptions([row]);
+
     return res.status(200).json({
       success: true,
       data: {
@@ -170,7 +218,7 @@ async function getCustomerDetails(req, res) {
         },
         subscription: {
           id: row.subscription_id,
-          status: row.status,
+          status: row.computed_status,
           start_date: row.start_date,
           started_at: row.started_at,
           paused_at: row.paused_at,
@@ -275,18 +323,23 @@ async function exportCustomers(req, res) {
     ];
     res.write(headers.join(",") + "\n");
 
-    // Stream each row
     for (const row of customers) {
+      const status = row.computed_status;
       const line = [
         escapeCsvValue(row.username),
         escapeCsvValue(row.email),
         escapeCsvValue(row.plan_name),
-        escapeCsvValue(row.status),
+        escapeCsvValue(status),
         escapeCsvValue(row.price),
         escapeCsvValue(row.billing_cycle),
         escapeCsvValue(row.start_date),
       ].join(",");
       res.write(line + "\n");
+    }
+
+    // Lazy sync in background after export starts
+    if (customers.length > 0) {
+      syncExpiredSubscriptions(customers);
     }
 
     return res.end();
