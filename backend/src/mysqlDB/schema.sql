@@ -88,8 +88,10 @@ CREATE TABLE IF NOT EXISTS subscription_events (
 );
 
 -- Performance indexes
-CREATE INDEX idx_sub_business_id        ON subscriptions(business_id);
-CREATE INDEX idx_sub_status             ON subscriptions(status);
-CREATE INDEX idx_sub_plan_id            ON subscriptions(plan_id);
-CREATE INDEX idx_sub_is_deleted         ON subscriptions(is_deleted);
-CREATE INDEX idx_events_subscription_id ON subscription_events(subscription_id);
+CREATE INDEX idx_subscriptions_business_status ON subscriptions(business_id, status);
+CREATE INDEX idx_subscriptions_dates           ON subscriptions(started_at, cancelled_at);
+CREATE INDEX idx_sub_plan_id                  ON subscriptions(plan_id);
+CREATE INDEX idx_sub_is_deleted               ON subscriptions(is_deleted);
+CREATE INDEX idx_events_type_date              ON subscription_events(subscription_id, event_type, created_at);
+CREATE INDEX idx_events_subscription_id       ON subscription_events(subscription_id);
+CREATE INDEX idx_plans_business               ON plans(business_id);
