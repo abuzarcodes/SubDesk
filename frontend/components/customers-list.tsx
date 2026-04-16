@@ -38,7 +38,7 @@ export function CustomersList({ subscriptions }: CustomersListProps) {
               <td className="px-4 py-3 text-sm text-foreground font-medium">{sub.plan_name}</td>
               <td className="px-4 py-3 text-sm text-foreground">${Number(sub.plan_price).toFixed(2)}</td>
               <td className="px-4 py-3">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-100">
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                   {sub.status}
                 </span>
               </td>

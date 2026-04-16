@@ -64,6 +64,76 @@ export interface PageConfigResponse {
   };
 }
 
+export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired' | 'inactive';
+
+export interface CustomerItem {
+  subscription_id: number;
+  status: SubscriptionStatus;
+  start_date: string;
+  started_at: string | null;
+  paused_at: string | null;
+  resumed_at: string | null;
+  cancelled_at: string | null;
+  expires_at: string | null;
+  customer_id: number;
+  username: string;
+  email: string;
+  plan_id: number;
+  plan_name: string;
+  price: number;
+  billing_cycle: 'monthly' | 'yearly';
+}
+
+export interface CustomerEvent {
+  id: number;
+  event_type: string;
+  metadata: string | null;
+  created_at: string;
+}
+
+export interface CustomerDetailsResponse {
+  customer: {
+    id: number;
+    username: string;
+    email: string;
+  };
+  subscription: {
+    id: number;
+    status: SubscriptionStatus;
+    start_date: string;
+    started_at: string | null;
+    paused_at: string | null;
+    resumed_at: string | null;
+    cancelled_at: string | null;
+    expires_at: string | null;
+  };
+  plan: {
+    id: number;
+    name: string;
+    price: number;
+    billing_cycle: 'monthly' | 'yearly';
+  };
+  events: CustomerEvent[];
+}
+
+export interface PaginatedCustomers {
+  data: CustomerItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface GetCustomersParams {
+  status?: string;
+  plan_id?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -197,6 +267,7 @@ class ApiClient {
   }
 
   async updateProfile(data: Partial<BusinessProfile>) {
+    console.log("hora hit");
     return this.request('/business/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -213,6 +284,71 @@ class ApiClient {
     return this.request('/business/page-config/unpublish', {
       method: 'POST',
     });
+  }
+
+  // Customer Management endpoints
+  async getCustomers(params: GetCustomersParams = {}, signal?: AbortSignal) {
+    const query = new URLSearchParams();
+    if (params.status) query.append('status', params.status);
+    if (params.plan_id) query.append('plan_id', params.plan_id);
+    if (params.search) query.append('search', params.search);
+    if (params.page !== undefined) query.append('page', params.page.toString());
+    if (params.limit !== undefined) query.append('limit', params.limit.toString());
+
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+
+    return this.request<{ success: boolean; data: CustomerItem[]; pagination: PaginatedCustomers['pagination'] }>(
+      `/customers${queryString}`,
+      { method: 'GET', signal }
+    );
+  }
+
+  async getCustomerDetails(id: number) {
+    return this.request<{ success: boolean; data: CustomerDetailsResponse }>(
+      `/customers/${id}`,
+      { method: 'GET' }
+    );
+  }
+
+  async updateSubscriptionStatus(id: number, action: 'pause' | 'resume' | 'cancel') {
+    return this.request<{ success: boolean; data: { message: string, subscription_id: number, status: SubscriptionStatus } }>(
+      `/subscriptions/${id}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ action })
+      }
+    );
+  }
+
+  async removeCustomer(id: number) {
+    return this.request<{ success: boolean; data: { message: string } }>(
+      `/customers/${id}`,
+      { method: 'DELETE' }
+    );
+  }
+
+  async exportCustomers(params: GetCustomersParams = {}): Promise<Blob> {
+    const query = new URLSearchParams();
+    if (params.status) query.append('status', params.status);
+    if (params.plan_id) query.append('plan_id', params.plan_id);
+    if (params.search) query.append('search', params.search);
+
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    const url = `${this.baseUrl}/customers/export${queryString}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return response.blob();
   }
 }
 

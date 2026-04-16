@@ -8,6 +8,7 @@ import planRoutes from "./routes/plans.routes.js";
 import subscriptionRoutes from "./routes/subscriptions.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 import configRoutes from "./routes/config.routes.js";
+import customerRoutes from "./routes/customers.routes.js";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/plans", planRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/business", configRoutes);
+app.use("/api/customers", customerRoutes);
 
 
 app.listen(process.env.PORT, () => {

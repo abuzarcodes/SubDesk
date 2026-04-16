@@ -98,10 +98,7 @@ export function PlanForm({ onSubmit, initialPlan, isLoading = false }: PlanFormP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-border bg-card p-6">
-      <h3 className="font-semibold text-foreground">
-        {initialPlan ? 'Edit Plan' : 'Create New Plan'}
-      </h3>
+    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
 
       <FormField label="Plan Name" error={errors.name}>
         <Input

@@ -38,7 +38,7 @@ export function ProfileForm({
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="px-0 pt-0">
-        <CardTitle className="text-2xl font-bold text-slate-900">Profile Settings</CardTitle>
+        <CardTitle className="text-2xl font-bold text-foreground">Profile Settings</CardTitle>
         <CardDescription>
           Customize how your business appears to your customers.
         </CardDescription>
@@ -46,11 +46,11 @@ export function ProfileForm({
       <CardContent className="px-0 space-y-6">
         <div className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="display_name" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="display_name" className="text-sm font-semibold text-foreground">
               Business Name
             </Label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                 <Layout size={18} />
               </div>
               <Input
@@ -59,19 +59,19 @@ export function ProfileForm({
                 value={profile.display_name || ''}
                 onChange={handleChange}
                 placeholder="e.g. Gym Pro"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                className="pl-10 h-11 rounded-xl border-border focus:ring-primary focus:border-primary transition-all shadow-sm"
                 required
               />
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="logo_url" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="logo_url" className="text-sm font-semibold text-foreground">
               Logo URL
             </Label>
             <div className="flex gap-3 items-start">
               <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                   <Globe size={18} />
                 </div>
                 <Input
@@ -80,11 +80,11 @@ export function ProfileForm({
                   value={profile.logo_url || ''}
                   onChange={handleChange}
                   placeholder="https://example.com/logo.png"
-                  className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                  className="pl-10 h-11 rounded-xl border-border focus:ring-primary focus:border-primary transition-all shadow-sm"
                 />
               </div>
               {profile.logo_url && (
-                <div className="w-11 h-11 rounded-xl border border-slate-200 bg-white p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                <div className="w-11 h-11 rounded-xl border border-border bg-card p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
                   <img src={profile.logo_url} alt="Logo preview" className="max-w-full max-h-full object-contain" />
                 </div>
               )}
@@ -92,11 +92,11 @@ export function ProfileForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="tagline" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="tagline" className="text-sm font-semibold text-foreground">
               Tagline
             </Label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                 <Quote size={18} />
               </div>
               <Input
@@ -105,17 +105,17 @@ export function ProfileForm({
                 value={profile.tagline || ''}
                 onChange={handleChange}
                 placeholder="Stay fit, stay healthy"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                className="pl-10 h-11 rounded-xl border-border focus:ring-primary focus:border-primary transition-all shadow-sm"
               />
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="support_email" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="support_email" className="text-sm font-semibold text-foreground">
               Support Email
             </Label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                 <Mail size={18} />
               </div>
               <Input
@@ -125,18 +125,18 @@ export function ProfileForm({
                 value={profile.support_email || ''}
                 onChange={handleChange}
                 placeholder="support@company.com"
-                className="pl-10 h-11 rounded-xl border-slate-200 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                className="pl-10 h-11 rounded-xl border-border focus:ring-primary focus:border-primary transition-all shadow-sm"
               />
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="slug" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="slug" className="text-sm font-semibold text-foreground">
               Unique URL Slug
             </Label>
             <div className="space-y-2">
               <div className="relative">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                   <Globe size={18} />
                 </div>
                 <Input
@@ -145,12 +145,12 @@ export function ProfileForm({
                   value={profile.slug || ''}
                   onChange={handleChange}
                   placeholder="gym-pro"
-                  className="pl-10 h-11 rounded-xl border-slate-200 font-mono text-sm focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                  className="pl-10 h-11 rounded-xl border-border font-mono text-sm focus:ring-primary focus:border-primary transition-all shadow-sm"
                   required
                 />
               </div>
-              <p className="text-[11px] text-slate-500 font-medium px-1">
-                Public URL: <span className="text-indigo-600">
+              <p className="text-[11px] text-muted-foreground font-medium px-1">
+                Public URL: <span className="text-primary">
                   {typeof window !== 'undefined' ? window.location.origin : ''}/subscribe/{profile.slug || 'your-id'}
                 </span>
               </p>
@@ -158,15 +158,15 @@ export function ProfileForm({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pt-4 bordert-t border-slate-100">
+        <div className="flex items-center gap-3 pt-4 border-t border-border">
           <Button
             onClick={onSave}
             disabled={!isDirty || isLoading || !profile.display_name || !profile.slug}
-            className="flex-1 h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-all shadow-lg shadow-indigo-200 disabled:shadow-none disabled:opacity-50"
+            className="flex-1 h-11 rounded-xl font-semibold transition-all disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                 Saving...
               </div>
             ) : (
@@ -180,7 +180,7 @@ export function ProfileForm({
             onClick={onReset}
             variant="outline"
             disabled={!isDirty || isLoading}
-            className="h-11 px-4 rounded-xl border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-all"
+            className="h-11 px-4 rounded-xl transition-all"
           >
             <RotateCcw size={18} />
           </Button>

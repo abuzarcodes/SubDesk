@@ -37,7 +37,13 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   plan_id INT NOT NULL,
   business_id INT NOT NULL,
   start_date DATE NOT NULL,
-  status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  status ENUM('active','paused','cancelled','expired','inactive') NOT NULL DEFAULT 'active',
+  started_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  paused_at TIMESTAMP NULL DEFAULT NULL,
+  resumed_at TIMESTAMP NULL DEFAULT NULL,
+  cancelled_at TIMESTAMP NULL DEFAULT NULL,
+  expires_at TIMESTAMP NULL DEFAULT NULL,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE,
@@ -70,3 +76,20 @@ CREATE TABLE IF NOT EXISTS page_configs (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (business_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Subscription audit trail
+CREATE TABLE IF NOT EXISTS subscription_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  subscription_id INT NOT NULL,
+  event_type ENUM('created','paused','resumed','cancelled','expired') NOT NULL,
+  metadata JSON NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
+);
+
+-- Performance indexes
+CREATE INDEX idx_sub_business_id        ON subscriptions(business_id);
+CREATE INDEX idx_sub_status             ON subscriptions(status);
+CREATE INDEX idx_sub_plan_id            ON subscriptions(plan_id);
+CREATE INDEX idx_sub_is_deleted         ON subscriptions(is_deleted);
+CREATE INDEX idx_events_subscription_id ON subscription_events(subscription_id);

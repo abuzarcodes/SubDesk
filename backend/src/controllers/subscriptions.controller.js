@@ -97,4 +97,138 @@ async function getCustomerSubscriptions(req, res) {
   }
 }
 
-export { createSubscription, getBusinessSubscriptions, getCustomerSubscriptions };
+// ── Subscription Status Management ─────────────────────────────────────────
+
+/**
+ * Centralized state-transition validator.
+ * Returns null when the transition is valid, or an error message string.
+ */
+function validateTransition(currentStatus, action) {
+  const allowed = {
+    active:    ["pause", "cancel"],
+    paused:    ["resume", "cancel"],
+    cancelled: [],
+    expired:   [],
+    inactive:  [],
+  };
+
+  const transitions = allowed[currentStatus];
+
+  // Unknown / terminal status
+  if (!transitions || transitions.length === 0) {
+    if (action === "pause" && currentStatus === "paused") {
+      return "Subscription is already paused";
+    }
+    if (action === "cancel" && currentStatus === "cancelled") {
+      return "Subscription is already cancelled";
+    }
+    return `Cannot perform actions on a subscription with status '${currentStatus}'`;
+  }
+
+  if (!transitions.includes(action)) {
+    return `Cannot '${action}' a subscription that is currently '${currentStatus}'`;
+  }
+
+  return null; // valid
+}
+
+/**
+ * PATCH /api/subscriptions/:id/status
+ * Body: { "action": "pause" | "resume" | "cancel" }
+ *
+ * - Validates ownership (business_id)
+ * - Enforces state-transition rules
+ * - Uses a transaction for atomic update + event insert
+ */
+async function updateSubscriptionStatus(req, res) {
+  try {
+    const subscriptionId = parseInt(req.params.id, 10);
+    if (isNaN(subscriptionId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid subscription ID" });
+    }
+
+    const { action } = req.body;
+    if (!action || !["pause", "resume", "cancel"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid action. Must be 'pause', 'resume', or 'cancel'",
+      });
+    }
+
+    // Fetch with ownership validation
+    const [rows] = await DB.execute(
+      `SELECT id, status FROM subscriptions WHERE id = ? AND business_id = ?`,
+      [subscriptionId, req.user.id]
+    );
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Subscription not found" });
+    }
+
+    const subscription = rows[0];
+
+    // Enforce state-transition rules
+    const error = validateTransition(subscription.status, action);
+    if (error) {
+      return res.status(400).json({ success: false, message: error });
+    }
+
+    // Determine SQL update + event type
+    let updateQuery;
+    let eventType;
+
+    switch (action) {
+      case "pause":
+        updateQuery = `UPDATE subscriptions SET status = 'paused', paused_at = NOW() WHERE id = ?`;
+        eventType = "paused";
+        break;
+      case "resume":
+        updateQuery = `UPDATE subscriptions SET status = 'active', resumed_at = NOW(), paused_at = NULL WHERE id = ?`;
+        eventType = "resumed";
+        break;
+      case "cancel":
+        updateQuery = `UPDATE subscriptions SET status = 'cancelled', cancelled_at = NOW() WHERE id = ?`;
+        eventType = "cancelled";
+        break;
+    }
+
+    // Atomic: both update and event must succeed or both fail
+    await DB.beginTransaction();
+    try {
+      await DB.execute(updateQuery, [subscriptionId]);
+      await DB.execute(
+        `INSERT INTO subscription_events (subscription_id, event_type) VALUES (?, ?)`,
+        [subscriptionId, eventType]
+      );
+      await DB.commit();
+    } catch (txError) {
+      await DB.rollback();
+      throw txError;
+    }
+
+    const newStatus = action === "resume" ? "active" : action === "cancel" ? "cancelled" : "paused";
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: `Subscription ${action}d successfully`,
+        subscription_id: subscriptionId,
+        status: newStatus,
+      },
+    });
+  } catch (error) {
+    console.error("updateSubscriptionStatus error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+export {
+  createSubscription,
+  getBusinessSubscriptions,
+  getCustomerSubscriptions,
+  updateSubscriptionStatus,
+};

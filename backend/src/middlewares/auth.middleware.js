@@ -19,4 +19,15 @@ function auth(req, res, next) {
   }
 }
 
-export { auth };
+/**
+ * Require the authenticated user to have the 'business' role.
+ * Must be placed AFTER the auth middleware in the chain.
+ */
+function requireBusiness(req, res, next) {
+  if (req.user.role !== "business") {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
+  next();
+}
+
+export { auth, requireBusiness };

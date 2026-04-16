@@ -8,9 +8,6 @@ import { ProfileForm } from "@/components/ProfileForm";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 export default function ProfilePage() {
   const [draftProfile, setDraftProfile] = useState<BusinessProfile>({
     display_name: "",
@@ -107,20 +104,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <div className="mb-6">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors group"
-        >
-          <ArrowLeft
-            size={16}
-            className="mr-2 group-hover:-translate-x-1 transition-transform"
-          />
-          Back to Dashboard
-        </Link>
-      </div>
-
+    <div className="mx-auto max-w-2xl px-4 py-6 md:px-6 md:py-8">
       <ProfileForm
         profile={draftProfile}
         onUpdate={handleUpdate}

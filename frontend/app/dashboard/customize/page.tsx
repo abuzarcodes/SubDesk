@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { apiClient, PageConfigResponse } from '@/lib/api';
 import { PageConfig, DEFAULT_CONFIG } from '@/lib/theme';
 import { cn } from '@/lib/utils';
-import { Navbar } from '@/components/navbar';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -565,12 +564,7 @@ export default function CustomizePage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <>
-        <Navbar />
-        <LoadingSpinner />
-      </>
-    );
+    return <LoadingSpinner />;
   }
 
   // Use slug if available, otherwise User ID
@@ -578,9 +572,7 @@ export default function CustomizePage() {
   const previewUrl = `/subscribe/${previewIdentifier}?preview=true`;
 
   return (
-    <>
-      <Navbar />
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-background">
+    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden bg-background">
         
         {/* Left Panel - Controls */}
         <div className="w-1/3 min-w-[320px] max-w-[400px] border-r border-border bg-card flex flex-col overflow-hidden">
@@ -606,7 +598,7 @@ export default function CustomizePage() {
                     <div className="space-y-1">
                       <h3 className="text-sm font-bold uppercase text-muted-foreground tracking-wider group-hover:text-primary transition-colors flex items-center gap-2">
                         Premium Presets
-                        <Badge variant="secondary" className="text-[9px] h-4 bg-indigo-100 text-indigo-700 border-none px-1.5">PRO</Badge>
+                        <Badge variant="secondary" className="text-[9px] h-4 bg-primary/10 text-primary border-none px-1.5">PRO</Badge>
                       </h3>
                       <p className="text-[10px] text-muted-foreground italic">Instant one-click professional styles</p>
                     </div>
@@ -622,8 +614,8 @@ export default function CustomizePage() {
                         className={cn(
                           "group relative flex flex-col items-start p-3 rounded-xl border transition-all hover:shadow-md",
                           draftConfig.theme.colors.primary === p.config.theme?.colors?.primary 
-                            ? "border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500" 
-                            : "border-border bg-card hover:border-indigo-300"
+                            ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                            : "border-border bg-card hover:border-primary/40"
                         )}
                       >
                         <div className="flex gap-1 mb-2">
@@ -640,11 +632,11 @@ export default function CustomizePage() {
                         <div className="mt-1 flex gap-1">
                           <span className={cn(
                             "text-[8px] px-1 rounded uppercase font-bold",
-                            p.config.theme?.mode === 'dark' ? "bg-slate-800 text-slate-200" : "bg-white text-slate-800 border"
+                            p.config.theme?.mode === 'dark' ? "bg-foreground/10 text-foreground" : "bg-card text-foreground border"
                           )}>
                             {p.config.theme?.mode}
                           </span>
-                          <span className="text-[8px] px-1 rounded uppercase font-bold bg-indigo-100 text-indigo-700">
+                          <span className="text-[8px] px-1 rounded uppercase font-bold bg-primary/10 text-primary">
                             {p.config.components?.cardStyle}
                           </span>
                         </div>
@@ -920,7 +912,7 @@ export default function CustomizePage() {
         <div className="flex-1 bg-muted relative p-4 flex flex-col">
           <div className="bg-background rounded-t-lg border-x border-t border-border p-2 flex items-center justify-between text-sm text-muted-foreground px-4">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
               <span className="font-medium">Live Preview</span>
             </div>
             <div className="flex items-center gap-3">
@@ -959,6 +951,5 @@ export default function CustomizePage() {
         </div>
 
       </div>
-    </>
   );
 }
