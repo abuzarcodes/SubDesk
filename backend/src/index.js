@@ -10,6 +10,7 @@ import publicRoutes from "./routes/public.routes.js";
 import configRoutes from "./routes/config.routes.js";
 import customerRoutes from "./routes/customers.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import { startExpireSubscriptionsJob } from "./jobs/expireSubscriptions.job.js";
 
 dotenv.config();
@@ -21,6 +22,9 @@ app.use(cors({
   origin: "http://localhost:3000",
   credentials: true,
 }));
+// Webhook requires raw body parsing for HMAC signature verification
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -37,6 +41,7 @@ app.use("/api/public", publicRoutes);
 app.use("/api/business", configRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 app.listen(process.env.PORT, () => {

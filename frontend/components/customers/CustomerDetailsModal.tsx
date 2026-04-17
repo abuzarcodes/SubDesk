@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { formatINR } from "@/lib/formatCurrency";
 
 interface CustomerDetailsModalProps {
   id: number | null;
@@ -132,7 +133,7 @@ export function CustomerDetailsModal({ id, isOpen, onClose, onError }: CustomerD
                 <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2">Plan Details</div>
                 <div className="font-medium text-foreground">{details.plan.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">${details.plan.price}</span> / {details.plan.billing_cycle}
+                  <span className="font-semibold text-foreground">{formatINR(Number(details.plan.price))}</span> / {details.plan.billing_cycle}
                 </div>
               </div>
             </div>

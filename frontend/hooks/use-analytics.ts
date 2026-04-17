@@ -131,7 +131,7 @@ function buildPlanPerformanceChart(data: PlanPerformanceItem[]): ChartData {
         yAxisID: 'ySubscribers',
       },
       {
-        label: 'Revenue ($)',
+        label: 'Revenue (₹)',
         data: data.map((d) => d.revenue),
         backgroundColor: 'rgba(0, 173, 181, 0.4)',
         borderColor: 'transparent',

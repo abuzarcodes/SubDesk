@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, CreditCard, DollarSign, TrendingDown } from 'lucide-react';
+import { Users, CreditCard, IndianRupee, TrendingDown } from 'lucide-react';
 import type { AnalyticsSummaryData } from '@/hooks/use-analytics';
 
 interface AnalyticsSummaryProps {
@@ -27,11 +27,11 @@ const KPI_CONFIG = [
   {
     key: 'mrr' as const,
     label: 'Monthly Recurring Revenue',
-    icon: DollarSign,
+    icon: IndianRupee,
     format: (v: number) =>
-      new Intl.NumberFormat('en-US', {
+      new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'INR',
         minimumFractionDigits: 2,
       }).format(v),
     iconColor: 'text-success',

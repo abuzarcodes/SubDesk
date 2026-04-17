@@ -1,20 +1,5 @@
 import { DB } from "../mysqlDB/database.js";
-
-/**
- * Helper to calculate expiration date based on billing cycle
- */
-function calculateExpiry(billingCycle) {
-  const now = new Date();
-  const expiry = new Date(now);
-
-  if (billingCycle === "monthly") {
-    expiry.setDate(expiry.getDate() + 30);
-  } else if (billingCycle === "yearly") {
-    expiry.setDate(expiry.getDate() + 365);
-  }
-
-  return expiry;
-}
+import { calculateExpiry } from "../utils/expiry.util.js";
 
 /**
  * Lazy-update helper to synchronize database status for expired subscriptions.
@@ -77,23 +62,9 @@ async function createSubscription(req, res) {
       return res.status(409).json({ message: "You are already subscribed to this plan" });
     }
 
-    const expiresAt = calculateExpiry(plan.billing_cycle);
+    return res.status(400).json({ message: "Direct subscription creation is deprecated. Please use the /api/payments/create-order flow." });
 
-    const [result] = await DB.execute(
-      `INSERT INTO subscriptions (customer_id, plan_id, business_id, start_date, status, expires_at) VALUES (?, ?, ?, CURDATE(), 'active', ?)`,
-      [req.user.id, plan_id, business_id, expiresAt]
-    );
 
-    return res.status(201).json({
-      message: "Subscription created successfully",
-      subscription: {
-        id: result.insertId,
-        plan_id,
-        business_id,
-        status: "active",
-        expires_at: expiresAt,
-      },
-    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });

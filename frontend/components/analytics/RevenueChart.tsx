@@ -61,8 +61,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
                   cornerRadius: 8,
                   padding: 10,
                   callbacks: {
-                    label: (ctx) =>
-                      `Revenue: $${ctx.parsed.y?.toFixed(2)}`,
+                    label: function (ctx: any) {
+                      return `Revenue: ₹${ctx.parsed.y?.toFixed(2)}`;
+                    },
                   },
                 },
               },
@@ -73,18 +74,15 @@ export function RevenueChart({ data }: RevenueChartProps) {
                     color: 'rgba(128, 128, 128, 0.7)',
                     font: { size: 11 },
                     maxTicksLimit: 10,
+                    maxRotation: 45,
+                    minRotation: 45,
                   },
                   border: { display: false },
                 },
                 y: {
                   beginAtZero: true,
                   grid: {
-                    color: 'rgba(128, 128, 128, 0.1)',
-                  },
-                  ticks: {
-                    color: 'rgba(128, 128, 128, 0.7)',
-                    font: { size: 11 },
-                    callback: (value) => `$${value}`,
+                    callback: (value: any) => `₹${value}`,
                   },
                   border: { display: false },
                 },

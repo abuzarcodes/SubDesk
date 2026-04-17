@@ -106,7 +106,7 @@ export function PlanPerformanceChart({ data }: PlanPerformanceChartProps) {
                   ticks: {
                     color: 'rgba(128, 128, 128, 0.7)',
                     font: { size: 11 },
-                    callback: (value) => `$${value}`,
+                    callback: (value) => `₹${value}`,
                   },
                   title: {
                     display: true,

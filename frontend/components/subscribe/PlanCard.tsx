@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plan } from '@/lib/api';
+import { formatINR } from '@/lib/formatCurrency';
 import { ComponentsConfig } from '@/lib/theme';
 import { Check, X } from 'lucide-react';
 import { SubscribeButton } from '@/components/subscribe/SubscribeButton';
@@ -70,7 +71,7 @@ export function PlanCard({ plan, index, config, businessId, isPreview = false }:
           </h3>
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-extrabold text-[var(--sub-primary)] drop-shadow-sm transition-all duration-300">
-              ${Number(plan.price).toFixed(2)}
+              {formatINR(Number(plan.price))}
             </span>
             <span className="text-[var(--sub-muted)] font-medium">/ {plan.billing_cycle}</span>
           </div>

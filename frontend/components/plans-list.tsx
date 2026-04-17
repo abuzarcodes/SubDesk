@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Plan } from '@/lib/api';
+import { formatINR } from '@/lib/formatCurrency';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +41,7 @@ export function PlansList({ plans, onEdit, onDelete, isLoading = false }: PlansL
           <div className="flex-1 space-y-1">
             <h4 className="font-medium text-foreground">{plan.name}</h4>
             <div className="text-sm text-muted-foreground">
-              ${Number(plan.price).toFixed(2)} / {plan.billing_cycle}
+              {formatINR(Number(plan.price))} / {plan.billing_cycle}
             </div>
             {plan.description && (
               <p className="text-xs text-muted-foreground line-clamp-1">{plan.description}</p>

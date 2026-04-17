@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Eye, PauseCircle, PlayCircle, XCircle, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatINR } from "@/lib/formatCurrency";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,7 +92,7 @@ export const CustomerRow = memo(function CustomerRow({
         </TableCell>
         <TableCell>
           <div className="font-medium">{item.plan_name}</div>
-          <div className="text-xs text-muted-foreground">${item.price} / {item.billing_cycle}</div>
+          <div className="text-xs text-muted-foreground">{formatINR(Number(item.price))} / {item.billing_cycle}</div>
         </TableCell>
         <TableCell>
           <Badge className={getStatusColor(item.status)} variant="secondary">

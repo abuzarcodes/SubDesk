@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Check, Tag } from 'lucide-react';
 import type { Plan } from '@/lib/api';
+import { formatINR } from '@/lib/formatCurrency';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,11 +36,11 @@ export function PlanCard({ plan, onEdit, onDelete, compact = false }: PlanCardPr
           <h4 className="text-base font-semibold text-foreground truncate">{plan.name}</h4>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-foreground">
-              ${Number(discountedPrice).toFixed(2)}
+              {formatINR(Number(discountedPrice))}
             </span>
             {hasDiscount && (
               <span className="text-sm text-muted-foreground line-through">
-                ${Number(plan.price).toFixed(2)}
+                {formatINR(Number(plan.price))}
               </span>
             )}
             <span className="text-sm text-muted-foreground">/ {plan.billing_cycle}</span>

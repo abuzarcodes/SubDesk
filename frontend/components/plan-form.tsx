@@ -110,13 +110,13 @@ export function PlanForm({ onSubmit, initialPlan, isLoading = false }: PlanFormP
         />
       </FormField>
 
-      <FormField label="Price (USD)" error={errors.price}>
+      <FormField label="Price (INR)" error={errors.price}>
         <Input
           type="number"
-          placeholder="29.99"
+          placeholder="499"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          step="0.01"
+          step="1"
           min="0"
           className="h-10"
         />

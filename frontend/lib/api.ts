@@ -225,11 +225,18 @@ class ApiClient {
     });
   }
 
-  // Subscriptions endpoints
-  async subscribe(planId: number, businessId: number) {
-    return this.request('/subscriptions', {
+  // Payments & Subscriptions endpoints
+  async createOrder(planId: number, businessId: number) {
+    return this.request<{ order_id: string; amount: number; currency: string; plan_name: string }>('/payments/create-order', {
       method: 'POST',
       body: JSON.stringify({ plan_id: planId, business_id: businessId }),
+    });
+  }
+
+  async verifyPayment(payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
+    return this.request<{ message: string }>('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   }
 
