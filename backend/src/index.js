@@ -11,6 +11,7 @@ import configRoutes from "./routes/config.routes.js";
 import customerRoutes from "./routes/customers.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import { startExpireSubscriptionsJob } from "./jobs/expireSubscriptions.job.js";
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use("/api/business", configRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/user", userRoutes);
 
 
 app.listen(process.env.PORT, () => {

@@ -39,6 +39,11 @@ export function PlanCard({ plan, index, config, businessId, isPreview = false }:
     }
   }
 
+  const hasDiscount = plan.discount && plan.discount > 0;
+  const discountedPrice = hasDiscount
+    ? plan.price * (1 - (plan.discount || 0) / 100)
+    : plan.price;
+
   return (
     <div 
       className={cardClasses}
@@ -66,13 +71,25 @@ export function PlanCard({ plan, index, config, businessId, isPreview = false }:
 
       <div className="flex-1 space-y-6 p-6 relative z-10">
         <div className="space-y-2">
-          <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--sub-text)] to-[color-mix(in_oklch,var(--sub-text)_70%,transparent)]">
-            {plan.name}
-          </h3>
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--sub-text)] to-[color-mix(in_oklch,var(--sub-text)_70%,transparent)]">
+              {plan.name}
+            </h3>
+            {hasDiscount && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_oklch,var(--sub-primary)_15%,transparent)] px-2.5 py-1 text-xs font-bold text-[var(--sub-primary)] mt-1">
+                {plan.discount}% OFF
+              </span>
+            )}
+          </div>
+          <div className="flex items-baseline gap-2">
             <span className="text-4xl font-extrabold text-[var(--sub-primary)] drop-shadow-sm transition-all duration-300">
-              {formatINR(Number(plan.price))}
+              {formatINR(Number(discountedPrice))}
             </span>
+            {hasDiscount && (
+              <span className="text-sm text-[var(--sub-muted)] line-through">
+                {formatINR(Number(plan.price))}
+              </span>
+            )}
             <span className="text-[var(--sub-muted)] font-medium">/ {plan.billing_cycle}</span>
           </div>
           {plan.description && (

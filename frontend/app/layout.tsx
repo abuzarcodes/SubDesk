@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
-import { Toaster } from 'sonner'
+import { Toaster as SonnerToaster } from 'sonner'
+import { Toaster as ShadcnToaster } from '@/components/ui/toaster'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -43,7 +44,8 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             {children}
-            <Toaster position="top-right" />
+            <SonnerToaster position="top-right" />
+            <ShadcnToaster />
           </AuthProvider>
         </ThemeProvider>
         <Analytics />

@@ -14,10 +14,10 @@ export function Topbar() {
       <div className="flex-1" />
       <div className="flex items-center gap-3">
         <span className="hidden text-sm text-muted-foreground sm:inline">
-          {user?.email}
+          {user?.username}
         </span>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold uppercase">
-          {user?.email?.charAt(0) || 'U'}
+          {user?.username?.charAt(0) || 'U'}
         </div>
       </div>
     </header>

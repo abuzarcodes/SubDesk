@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
+import { useRouter, redirect } from 'next/navigation';
 import { usePlans } from '@/hooks/use-plans';
 import { apiClient } from '@/lib/api';
 import { PlanCard } from '@/components/dashboard/PlanCard';
@@ -24,10 +24,19 @@ export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
 
+  // Redirect customer users to their subscriptions page
   useEffect(() => {
-    fetchPlans();
-    loadProfile();
-  }, [fetchPlans]);
+    if (user?.role === 'customer') {
+      router.replace('/dashboard/subscriptions');
+    }
+  }, [user, router]);
+
+  useEffect(() => {
+    if (user?.role !== 'customer') {
+      fetchPlans();
+      loadProfile();
+    }
+  }, [fetchPlans, user?.role]);
 
   const loadProfile = async () => {
     try {
@@ -70,6 +79,11 @@ export default function DashboardPage() {
   };
 
   const previewPlans = plans.slice(0, 3);
+
+  // If customer, render nothing while redirecting
+  if (user?.role === 'customer') {
+    return null;
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8 space-y-6">

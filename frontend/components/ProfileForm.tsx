@@ -6,14 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { formatSlug } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Save, RotateCcw, Globe, Mail, Quote, Layout } from 'lucide-react';
+import { Globe, Mail, Quote, Layout } from 'lucide-react';
 
 interface ProfileFormProps {
   profile: BusinessProfile;
   onUpdate: (data: Partial<BusinessProfile>) => void;
   onSave: () => void;
-  onReset: () => void;
+  onCancel: () => void;
   isDirty: boolean;
   isLoading?: boolean;
 }
@@ -22,7 +21,7 @@ export function ProfileForm({
   profile,
   onUpdate,
   onSave,
-  onReset,
+  onCancel,
   isDirty,
   isLoading = false,
 }: ProfileFormProps) {
@@ -35,15 +34,13 @@ export function ProfileForm({
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  }
+
   return (
-    <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className="px-0 pt-0">
-        <CardTitle className="text-2xl font-bold text-foreground">Profile Settings</CardTitle>
-        <CardDescription>
-          Customize how your business appears to your customers.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-0 space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 pt-2">
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="display_name" className="text-sm font-semibold text-foreground">
@@ -69,7 +66,7 @@ export function ProfileForm({
             <Label htmlFor="logo_url" className="text-sm font-semibold text-foreground">
               Logo URL
             </Label>
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3 items-center">
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
                   <Globe size={18} />
@@ -158,34 +155,22 @@ export function ProfileForm({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pt-4 border-t border-border">
+        <div className="flex justify-end items-center gap-3 pt-4 border-t border-border">
           <Button
-            onClick={onSave}
-            disabled={!isDirty || isLoading || !profile.display_name || !profile.slug}
-            className="flex-1 h-11 rounded-xl font-semibold transition-all disabled:opacity-50"
+            type="button"
+            onClick={onCancel}
+            variant="outline"
+            disabled={isLoading}
           >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                Saving...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Save size={18} />
-                Save Changes
-              </div>
-            )}
+            Cancel
           </Button>
           <Button
-            onClick={onReset}
-            variant="outline"
+            type="submit"
             disabled={!isDirty || isLoading}
-            className="h-11 px-4 rounded-xl transition-all"
           >
-            <RotateCcw size={18} />
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+    </form>
   );
 }

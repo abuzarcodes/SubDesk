@@ -18,7 +18,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || user.role !== 'business') {
+    if (!user) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
@@ -31,7 +31,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (!user || user.role !== 'business') {
+  if (!user) {
     return null;
   }
 

@@ -116,6 +116,119 @@ export interface CustomerDetailsResponse {
   events: CustomerEvent[];
 }
 
+export interface UserDashboardSummary {
+  stats: {
+    activeSubscriptions: number;
+    monthlySpend: number;
+    upcomingPayments: number;
+  };
+  subscriptionsPreview: Array<{
+    id: number;
+    plan_name: string;
+    business_name: string;
+    price: number;
+    status: SubscriptionStatus;
+    expires_at: string | null;
+  }>;
+  upcomingPayments: Array<{
+    id: number;
+    name: string;
+    price: number;
+    expires_at: string | null;
+  }>;
+  recentActivity: Array<{
+    event_type: string;
+    created_at: string;
+    plan_name: string;
+  }>;
+}
+
+export interface UserSubscriptionItem {
+  id: number;
+  plan_name: string;
+  business_name: string;
+  price: number;
+  billing_cycle: 'monthly' | 'yearly';
+  status: SubscriptionStatus;
+  expires_at: string | null;
+  created_at: string;
+}
+
+export interface PaginatedUserSubscriptions {
+  data: UserSubscriptionItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface UserBillingSummary {
+  totalSpent: number;
+  thisMonth: number;
+  failedPayments: number;
+}
+
+export interface UserTransaction {
+  id: number;
+  plan_name: string;
+  business_name: string;
+  amount: number;
+  status: 'captured' | 'failed' | 'pending';
+  created_at: string;
+}
+
+export interface AnalyticsData {
+  spendTrend: { date: string; value: number }[];
+  subscriptionGrowth: { date: string; value: number }[];
+  cancellations: { date: string; value: number }[];
+}
+
+export interface PaginatedUserTransactions {
+  data: UserTransaction[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface GetUserSubscriptionsParams {
+  status?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface UserSubscriptionDetailsResponse {
+  subscription: {
+    id: number;
+    status: SubscriptionStatus;
+    start_date: string;
+    started_at: string | null;
+    paused_at: string | null;
+    resumed_at: string | null;
+    cancelled_at: string | null;
+    expires_at: string | null;
+    created_at: string;
+  };
+  plan: {
+    id: number;
+    name: string;
+    price: number;
+    billing_cycle: 'monthly' | 'yearly';
+    description: string | null;
+  };
+  business: {
+    name: string;
+    logo_url: string | null;
+    support_email: string | null;
+  };
+  events: CustomerEvent[];
+}
+
 export interface PaginatedCustomers {
   data: CustomerItem[];
   pagination: {
@@ -317,6 +430,14 @@ class ApiClient {
     );
   }
 
+  // User Dashboard endpoints
+  async getDashboardSummary() {
+    return this.request<{ success: boolean; data: UserDashboardSummary }>(
+      '/user/dashboard-summary',
+      { method: 'GET' }
+    );
+  }
+
   async updateSubscriptionStatus(id: number, action: 'pause' | 'resume' | 'cancel') {
     return this.request<{ success: boolean; data: { message: string, subscription_id: number, status: SubscriptionStatus } }>(
       `/subscriptions/${id}/status`,
@@ -331,6 +452,94 @@ class ApiClient {
     return this.request<{ success: boolean; data: { message: string } }>(
       `/customers/${id}`,
       { method: 'DELETE' }
+    );
+  }
+
+  // --- User Subscriptions API ---
+
+  async getUserSubscriptions(params: GetUserSubscriptionsParams = {}, signal?: AbortSignal) {
+    const query = new URLSearchParams();
+    if (params.status && params.status !== 'all') query.append('status', params.status);
+    if (params.search) query.append('search', params.search);
+    if (params.page !== undefined) query.append('page', params.page.toString());
+    if (params.limit !== undefined) query.append('limit', params.limit.toString());
+
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+
+    return this.request<{ success: boolean; data: UserSubscriptionItem[]; pagination: PaginatedUserSubscriptions['pagination'] }>(
+      `/user/subscriptions${queryString}`,
+      { method: 'GET', signal }
+    );
+  }
+
+  async getUserSubscriptionDetails(id: number) {
+    return this.request<{ success: boolean; data: UserSubscriptionDetailsResponse }>(
+      `/user/subscriptions/${id}`,
+      { method: 'GET' }
+    );
+  }
+
+  async updateUserSubscriptionStatus(id: number, action: 'pause' | 'resume' | 'cancel') {
+    return this.request<{ success: boolean; data: { message: string, subscription_id: number, status: SubscriptionStatus } }>(
+      `/user/subscriptions/${id}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ action })
+      }
+    );
+  }
+
+  async bulkUpdateUserSubscriptions(ids: number[], action: 'pause' | 'cancel') {
+    return this.request<{ success: boolean; data: any }>(
+      `/user/subscriptions/bulk-action`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ ids, action })
+      }
+    );
+  }
+
+  // --- User Billing API ---
+  async getUserBillingSummary(signal?: AbortSignal) {
+    return this.request<{ success: boolean; data: UserBillingSummary }>(
+      `/user/billing-summary`,
+      { method: 'GET', signal }
+    );
+  }
+
+  async getUserTransactions(params: { page?: number; limit?: number } = {}, signal?: AbortSignal) {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.append('page', params.page.toString());
+    if (params.limit !== undefined) query.append('limit', params.limit.toString());
+
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+
+    return this.request<{ success: boolean; data: UserTransaction[]; pagination: PaginatedUserTransactions['pagination'] }>(
+      `/user/transactions${queryString}`,
+      { method: 'GET', signal }
+    );
+  }
+
+  // --- User Analytics API ---
+  async getUserAnalytics(range: "7d" | "30d" | "90d", signal?: AbortSignal) {
+    return this.request<{ success: boolean; data: AnalyticsData }>(
+      `/user/analytics?range=${range}`,
+      { method: 'GET', signal }
+    );
+  }
+
+  // --- User Settings API ---
+  async getUserProfile(signal?: AbortSignal) {
+    return this.request<{ success: boolean; data: { username: string; email: string, role: string } }>(
+      '/user/profile',
+      { method: 'GET', signal }
+    );
+  }
+
+  async updateUserProfile(data: { username: string; email: string }) {
+    return this.request<{ success: boolean; data: { username: string; email: string } }>(
+      '/user/profile',
+      { method: 'PUT', body: JSON.stringify(data) }
     );
   }
 

@@ -22,9 +22,8 @@ export async function createOrder(req, res) {
       return res.status(400).json({ message: "Plan ID and business ID are required." });
     }
 
-    // 1. Verify plan ownership
     const [planRows] = await DB.execute(
-      `SELECT id, name, price, billing_cycle FROM plans WHERE id = ? AND business_id = ?`,
+      `SELECT id, name, price, billing_cycle, discount FROM plans WHERE id = ? AND business_id = ?`,
       [plan_id, business_id]
     );
 
@@ -65,7 +64,11 @@ export async function createOrder(req, res) {
     }
 
     // 4. Create Razorpay order
-    const amountInPaise = Math.round(Number(plan.price) * 100);
+    let finalPrice = Number(plan.price);
+    if (plan.discount && plan.discount > 0) {
+      finalPrice = finalPrice - (finalPrice * (Number(plan.discount) / 100));
+    }
+    const amountInPaise = Math.round(finalPrice * 100);
     const receiptId = `sub_${Date.now()}_${req.user.id}`;
     
     const orderOptions = {
@@ -118,7 +121,7 @@ export async function verifyPayment(req, res) {
 
     // 2. Fetch Subscription and Plan to verify Amount Integrity
     const [rows] = await DB.execute(
-      `SELECT s.id, s.status, s.payment_status, p.price, p.billing_cycle 
+      `SELECT s.id, s.status, s.payment_status, p.price, p.billing_cycle, p.discount 
        FROM subscriptions s 
        JOIN plans p ON s.plan_id = p.id 
        WHERE s.razorpay_order_id = ?`,
@@ -138,7 +141,11 @@ export async function verifyPayment(req, res) {
 
     // Check with Razorpay payment details for double security (Amount Integrity Check)
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
-    const expectedAmountPaise = Math.round(Number(sub.price) * 100);
+    let expectedPrice = Number(sub.price);
+    if (sub.discount && sub.discount > 0) {
+      expectedPrice = expectedPrice - (expectedPrice * (Number(sub.discount) / 100));
+    }
+    const expectedAmountPaise = Math.round(expectedPrice * 100);
     
     if (payment.amount !== expectedAmountPaise) {
       return res.status(400).json({ message: "Payment amount mismatch." });
@@ -194,7 +201,7 @@ export async function webhookHandler(req, res) {
 
       // Find tracking record
       const [rows] = await DB.execute(
-        `SELECT s.id, s.status, s.payment_status, p.price, p.billing_cycle 
+        `SELECT s.id, s.status, s.payment_status, p.price, p.billing_cycle, p.discount 
          FROM subscriptions s 
          JOIN plans p ON s.plan_id = p.id 
          WHERE s.razorpay_order_id = ?`,
@@ -208,14 +215,21 @@ export async function webhookHandler(req, res) {
         if (sub.status !== "active" && sub.payment_status !== "paid") {
           
           // Integrity Check
-          const expectedAmountPaise = Math.round(Number(sub.price) * 100);
+          let expectedPrice = Number(sub.price);
+          if (sub.discount && sub.discount > 0) {
+            expectedPrice = expectedPrice - (expectedPrice * (Number(sub.discount) / 100));
+          }
+          const expectedAmountPaise = Math.round(expectedPrice * 100);
+          
           if (amountPaise === expectedAmountPaise) {
             
             const expiresAt = calculateExpiry(sub.billing_cycle);
             
-            await DB.transaction(async (connection) => {
+            try {
+              await DB.beginTransaction();
+
               // Mark subscription activated
-              await connection.execute(
+              await DB.execute(
                 `UPDATE subscriptions 
                  SET status = 'active', payment_status = 'paid', started_at = NOW(), expires_at = ?, razorpay_payment_id = ? 
                  WHERE id = ?`,
@@ -223,13 +237,18 @@ export async function webhookHandler(req, res) {
               );
 
               // Log payment as captured
-              await connection.execute(
+              await DB.execute(
                 `INSERT INTO payments 
                  (subscription_id, razorpay_order_id, razorpay_payment_id, amount, currency, status, payment_method, raw_payload) 
                  VALUES (?, ?, ?, ?, ?, ?, 'razorpay', ?)`,
                 [sub.id, razorpay_order_id, razorpay_payment_id, Number(sub.price), currency, "captured", JSON.stringify(payload)]
               );
-            });
+
+              await DB.commit();
+            } catch (txError) {
+              await DB.rollback();
+              throw txError;
+            }
             console.log(`Webhook: Subscription ${sub.id} activated successfully.`);
           } else {
              console.error(`Webhook: Amount mismatch for order ${razorpay_order_id}`);
@@ -244,7 +263,10 @@ export async function webhookHandler(req, res) {
       const razorpay_payment_id = payment.id;
 
       const [rows] = await DB.execute(
-        `SELECT id, price FROM subscriptions WHERE razorpay_order_id = ?`,
+        `SELECT s.id, p.price 
+         FROM subscriptions s 
+         JOIN plans p ON s.plan_id = p.id 
+         WHERE s.razorpay_order_id = ?`,
         [razorpay_order_id]
       );
 

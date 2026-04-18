@@ -27,15 +27,22 @@ import {
   LogOut,
   Moon,
   Sun,
+  Receipt,
 } from 'lucide-react';
 
-const NAV_ITEMS = [
+const BUSINESS_NAV_ITEMS = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
   { title: 'Plans', href: '/dashboard/plans', icon: CreditCard },
   { title: 'Customers', href: '/dashboard/customers', icon: Users },
   { title: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { title: 'Customization', href: '/dashboard/customize', icon: Palette },
-  { title: 'Profile', href: '/dashboard/profile', icon: UserCircle },
+];
+
+const CUSTOMER_NAV_ITEMS = [
+  { title: 'Dashboard', href: '/dashboard/overview', icon: LayoutDashboard },
+  { title: 'Subscriptions', href: '/dashboard/subscriptions', icon: CreditCard },
+  { title: 'Billing', href: '/dashboard/billing', icon: Receipt },
+  { title: 'Analytics', href: '/dashboard/user-analytics', icon: BarChart3 },
 ];
 
 export function AppSidebar() {
@@ -43,7 +50,10 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  const isActive = (item: (typeof NAV_ITEMS)[0]) => {
+  const navItems = user?.role === 'customer' ? CUSTOMER_NAV_ITEMS : BUSINESS_NAV_ITEMS;
+  const settingsHref = user?.role === 'business' ? '/dashboard/profile' : '/dashboard/settings';
+
+  const isActive = (item: (typeof BUSINESS_NAV_ITEMS)[0]) => {
     if (item.exact) {
       return pathname === item.href;
     }
@@ -68,8 +78,8 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.href}>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item)}
@@ -92,7 +102,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton tooltip={user?.email || 'User'} className="cursor-default">
               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-sidebar-primary text-[10px] font-bold uppercase">
-                {user?.email?.charAt(0) || 'U'}
+                {user?.username?.charAt(0) || 'U'}
               </div>
               <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
                 <span className="text-xs font-medium text-sidebar-foreground truncate">
@@ -111,6 +121,18 @@ export function AppSidebar() {
             >
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === settingsHref}
+              tooltip="Settings"
+            >
+              <Link href={settingsHref}>
+                <UserCircle className="h-4 w-4" />
+                <span>Settings</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
