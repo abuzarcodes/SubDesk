@@ -9,7 +9,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, role: Role) => Promise<void>;
+  register: (username: string, email: string, password: string, role: Role, tosAccepted: boolean) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -54,11 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, role: Role) => {
+  const register = async (username: string, email: string, password: string, role: Role, tosAccepted: boolean) => {
     setLoading(true);
     setError(null);
     try {
-      await apiClient.register(username, email, password, role);
+      await apiClient.register(username, email, password, role, tosAccepted);
       // Auto-login after registration
       const user = await apiClient.login(email, password);
       setUser(user);

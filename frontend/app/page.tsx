@@ -425,8 +425,16 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 text-center text-muted-foreground border-t border-border">
-         <p>© {new Date().getFullYear()} Subdesk. All rights reserved.</p>
+      <footer className="py-12 border-t border-border">
+         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-muted-foreground text-sm order-2 md:order-1">
+              © {new Date().getFullYear()} Subdesk. All rights reserved.
+            </p>
+            <div className="flex gap-8 order-1 md:order-2">
+              <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors hover:underline underline-offset-4">Terms of Service</Link>
+              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hover:underline underline-offset-4">Privacy Policy</Link>
+            </div>
+         </div>
       </footer>
     </div>
   );

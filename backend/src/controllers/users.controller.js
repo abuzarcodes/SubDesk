@@ -14,7 +14,7 @@ async function fetchAllUsers(req, res) {
 }
 
 async function registerUser(req, res) {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, tosAccepted } = req.body;
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -24,9 +24,10 @@ async function registerUser(req, res) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
+    const tosAcceptedAt = tosAccepted ? new Date() : null;
     await DB.execute(
-      `INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`,
-      [username, email, hashedPassword, userRole]
+      `INSERT INTO users (username, email, password, role, tos_accepted, tos_accepted_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [username, email, hashedPassword, userRole, tosAccepted ? 1 : 0, tosAcceptedAt]
     );
 
     const [row] = await DB.execute(

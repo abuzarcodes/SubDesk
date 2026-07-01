@@ -8,6 +8,8 @@ import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/form-field';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import type { Role } from '@/lib/api';
 
@@ -20,6 +22,7 @@ function RegisterPageContent() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('business');
   const [loading, setLoading] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { register } = useAuth();
   const router = useRouter();
@@ -39,6 +42,7 @@ function RegisterPageContent() {
     if (!email) newErrors.email = 'Email is required';
     if (!password) newErrors.password = 'Password is required';
     if (password && password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+    if (!tosAccepted) newErrors.tos = 'You must accept the terms and privacy policy';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -51,7 +55,7 @@ function RegisterPageContent() {
 
     setLoading(true);
     try {
-      await register(username, email, password, role);
+      await register(username, email, password, role, tosAccepted);
       toast.success('Account created successfully!');
       router.push(role === 'business' ? '/dashboard' : '/my-subscriptions');
     } catch (error) {
@@ -118,9 +122,37 @@ function RegisterPageContent() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-10 rounded-lg border border-input bg-card"
+                 className="h-10 rounded-lg border border-input bg-card"
               />
             </FormField>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3 bg-muted/30 p-4 rounded-xl border border-border/50">
+                <Checkbox
+                  id="tos"
+                  checked={tosAccepted}
+                  onCheckedChange={(checked) => setTosAccepted(checked as boolean)}
+                  className="mt-0.5"
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="tos"
+                    className="text-sm font-medium leading-none cursor-pointer text-muted-foreground"
+                  >
+                    I agree to the{' '}
+                    <Link href="/terms" className="text-primary hover:underline font-semibold">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" className="text-primary hover:underline font-semibold">
+                      Privacy Policy
+                    </Link>
+                  </Label>
+                  {errors.tos && (
+                    <p className="text-xs text-destructive font-medium">{errors.tos}</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <Button
               type="submit"
