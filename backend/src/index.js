@@ -19,12 +19,14 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors({
-  origin: ["http://localhost:3000","https://subtrckr.vercel.app/"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://subtrckr.vercel.app"],
+    credentials: true,
+  }),
+);
 // Webhook requires raw body parsing for HMAC signature verification
-app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,7 +46,6 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/user", userRoutes);
-
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
