@@ -20,7 +20,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000","https://subtrckr.vercel.app/"],
   credentials: true,
 }));
 // Webhook requires raw body parsing for HMAC signature verification
