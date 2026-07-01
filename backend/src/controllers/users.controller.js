@@ -80,7 +80,6 @@ async function registerUser(req, res) {
       httpOnly: true,
       secure: true, // required for SameSite=None
       sameSite: "none",
-      domain: ".yourdomain.com", // only if frontend/backend share a parent domain
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -130,13 +129,12 @@ async function userLogin(req, res) {
       { expiresIn: "7d" },
     );
 
-    res.cookie('userToken', token, {
-  httpOnly: true,
-  secure: true,        // required for SameSite=None
-  sameSite: 'none',
-  domain: '.yourdomain.com', // only if frontend/backend share a parent domain
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+    res.cookie("userToken", token, {
+      httpOnly: true,
+      secure: true, // required for SameSite=None
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       message: "Login successful",
