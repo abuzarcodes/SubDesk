@@ -5,7 +5,7 @@ import { DB } from "../mysqlDB/database.js";
 async function fetchAllUsers(req, res) {
   try {
     const [results] = await DB.execute(
-      "SELECT id, username, email, role, created_at FROM users;"
+      "SELECT id, username, email, role, created_at FROM users;",
     );
     return res.status(200).json(results);
   } catch (error) {
@@ -27,28 +27,41 @@ async function registerUser(req, res) {
     const tosAcceptedAt = tosAccepted ? new Date() : null;
     await DB.execute(
       `INSERT INTO users (username, email, password, role, tos_accepted, tos_accepted_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      [username, email, hashedPassword, userRole, tosAccepted ? 1 : 0, tosAcceptedAt]
+      [
+        username,
+        email,
+        hashedPassword,
+        userRole,
+        tosAccepted ? 1 : 0,
+        tosAcceptedAt,
+      ],
     );
 
     const [row] = await DB.execute(
       `SELECT id, username, email, role FROM users WHERE email = ?`,
-      [email]
+      [email],
     );
     const user = row[0];
 
     if (userRole === "business") {
       await DB.execute(
         `INSERT INTO business_profiles (business_id, display_name) VALUES (?, ?)`,
-        [user.id, user.username]
+        [user.id, user.username],
       );
-      
-      const defaultTheme = JSON.stringify({ mode: "light", colors: { primary: "#000000", background: "#ffffff" } });
+
+      const defaultTheme = JSON.stringify({
+        mode: "light",
+        colors: { primary: "#000000", background: "#ffffff" },
+      });
       const defaultLayout = JSON.stringify({ type: "grid", columns: 3 });
-      const defaultComponents = JSON.stringify({ cardStyle: "solid", buttonStyle: "rounded" });
-      
+      const defaultComponents = JSON.stringify({
+        cardStyle: "solid",
+        buttonStyle: "rounded",
+      });
+
       await DB.execute(
         `INSERT INTO page_configs (business_id, theme, layout, components, is_published) VALUES (?, ?, ?, ?, ?)`,
-        [user.id, defaultTheme, defaultLayout, defaultComponents, true]
+        [user.id, defaultTheme, defaultLayout, defaultComponents, true],
       );
     }
 
@@ -60,12 +73,14 @@ async function registerUser(req, res) {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.cookie("userToken", token, {
       httpOnly: true,
-      sameSite: "lax",
+      secure: true, // required for SameSite=None
+      sameSite: "none",
+      domain: ".yourdomain.com", // only if frontend/backend share a parent domain
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -90,7 +105,7 @@ async function userLogin(req, res) {
 
     const [rows] = await DB.execute(
       "SELECT id, username, email, password, role FROM users WHERE email = ?",
-      [email]
+      [email],
     );
 
     if (rows.length === 0) {
@@ -112,14 +127,16 @@ async function userLogin(req, res) {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
-    res.cookie("userToken", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('userToken', token, {
+  httpOnly: true,
+  secure: true,        // required for SameSite=None
+  sameSite: 'none',
+  domain: '.yourdomain.com', // only if frontend/backend share a parent domain
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
     return res.status(200).json({
       message: "Login successful",
