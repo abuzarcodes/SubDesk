@@ -182,13 +182,13 @@ export default function PrivacyPage() {
                   <h2 className="text-xl font-bold m-0 uppercase tracking-wider text-foreground">Contact</h2>
                 </div>
                 <p>For questions, please contact us at:</p>
-                <p className="font-bold text-lg text-primary">privacy@subtrckr.com</p>
+                <p className="font-bold text-lg text-primary">privacy@subdesk.com</p>
               </section>
             </div>
           </div>
 
           <div className="flex items-center justify-between py-12 border-t border-border">
-            <p className="text-sm text-muted-foreground">© 2026 SubTrckr. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2026 SubDesk. All rights reserved.</p>
             <div className="flex gap-6">
               <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline">Terms of Service</Link>
             </div>

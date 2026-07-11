@@ -68,7 +68,7 @@ export function AppSidebar() {
             S
           </div>
           <span className="text-base font-semibold text-sidebar-foreground truncate group-data-[collapsible=icon]:hidden">
-            SubTrckr
+            SubDesk
           </span>
         </Link>
       </SidebarHeader>

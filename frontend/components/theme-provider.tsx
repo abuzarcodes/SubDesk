@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('subtrckr-theme') as Theme | null;
+    const stored = localStorage.getItem('subdesk-theme') as Theme | null;
     const initial = stored || 'light';
     setThemeState(initial);
     document.documentElement.setAttribute('data-theme', initial);
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('subtrckr-theme', newTheme);
+    localStorage.setItem('subdesk-theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 

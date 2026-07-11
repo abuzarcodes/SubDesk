@@ -11,7 +11,7 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'SubTrckr - Subscription Management',
+  title: 'SubDesk - Subscription Management',
   description: 'Manage subscription plans and customers with ease',
   generator: 'v0.app',
   icons: {

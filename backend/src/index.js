@@ -47,7 +47,7 @@ app.use(cookieParser());
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("SubTrckr API is running");
+  res.send("SubDesk API is running");
 });
 
 app.use("/api/auth", authRoutes);

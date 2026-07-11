@@ -1,11 +1,8 @@
-# SubTrckr API Documentation
+# SubDesk API Documentation
 
-This document outlines the available REST API endpoints for the SubTrckr platform.
+This document outlines the available REST API endpoints for the SubDesk platform.
 
 ## Base URL
-\`http://localhost:3030/api\`
-
----
 
 ## 1. Authentication (\`/api/auth\`)
 

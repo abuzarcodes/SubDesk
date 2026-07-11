@@ -1,5 +1,5 @@
--- SubTrckr: Customer-side performance indexes
--- Run: mysql -u root -p subtrckrdb < migrate_user_indexes.sql
+-- SubDesk: Customer-side performance indexes
+-- Run: mysql -u root -p subdeskdb < migrate_user_indexes.sql
 
 -- Index for customer subscription lookups filtered by status
 CREATE INDEX idx_subscriptions_customer_status

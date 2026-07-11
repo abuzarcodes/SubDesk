@@ -32,7 +32,7 @@ export function SubscribeThemeProvider({ initialConfig, children }: SubscribeThe
       // if (event.origin !== window.location.origin) return;
 
       const data = event.data;
-      if (data && data.type === 'SUBTRCKR_PREVIEW_UPDATE' && data.payload) {
+      if (data && data.type === 'SUBDESK_PREVIEW_UPDATE' && data.payload) {
         setConfig(data.payload);
       }
     };

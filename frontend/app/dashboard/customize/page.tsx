@@ -474,7 +474,7 @@ export default function CustomizePage() {
   useEffect(() => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
-        { type: 'SUBTRCKR_PREVIEW_UPDATE', payload: debouncedConfig },
+        { type: 'SUBDESK_PREVIEW_UPDATE', payload: debouncedConfig },
         '*'
       );
     }
@@ -941,7 +941,7 @@ export default function CustomizePage() {
               onLoad={() => {
                 if (iframeRef.current && iframeRef.current.contentWindow) {
                   iframeRef.current.contentWindow.postMessage(
-                    { type: 'SUBTRCKR_PREVIEW_UPDATE', payload: draftConfig },
+                    { type: 'SUBDESK_PREVIEW_UPDATE', payload: draftConfig },
                     '*'
                   );
                 }

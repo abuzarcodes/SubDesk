@@ -61,7 +61,7 @@ export function SubscribeButton({ planId, businessId, buttonStyle, isPreview = f
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Test key
         amount: order.amount,
         currency: order.currency || "INR",
-        name: 'SubTrckr',
+        name: 'SubDesk',
         description: order.plan_name,
         order_id: order.order_id,
         prefill: {

@@ -97,14 +97,14 @@ def run_single_subscription(subscription_url, base_url="http://localhost:3000"):
         driver.quit()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SubTrckr Automated Subscriber Bot")
+    parser = argparse.ArgumentParser(description="SubDesk Automated Subscriber Bot")
     parser.add_argument("url", help="The shareable subscription link (e.g., http://localhost:3000/subscribe/username)")
     parser.add_argument("--base", default="http://localhost:3000", help="Base URL of the application")
     parser.add_argument("-n", "--count", type=int, default=1, help="Number of users to add")
     
     args = parser.parse_args()
     
-    print(f"--- SubTrckr Bot Starting (Total Users: {args.count}) ---")
+    print(f"--- SubDesk Bot Starting (Total Users: {args.count}) ---")
     for i in range(args.count):
         print(f"--- Processing user {i+1} of {args.count} ---")
         run_single_subscription(args.url, args.base)

@@ -1,6 +1,6 @@
-# SubTrckr - Comprehensive Project Documentation
+# SubDesk - Comprehensive Project Documentation
 
-SubTrckr is a modern, full-stack **SaaS Subscription Management Platform** designed to help business owners launch and track subscription businesses with ease. It bridges the gap between businesses offering services/products and customers who want a seamless subscription experience.
+SubDesk is a modern, full-stack **SaaS Subscription Management Platform** designed to help business owners launch and track subscription businesses with ease. It bridges the gap between businesses offering services/products and customers who want a seamless subscription experience.
 
 ---
 
@@ -86,7 +86,7 @@ The core link between customers and plans.
 
 ### 4. `business_profiles` & `page_configs`
 Power the dynamic landing pages.
-- `slug`: Unique URL for the business (e.g., `subtrckr.com/subscribe/my-brand`).
+- `slug`: Unique URL for the business (e.g., `subdesk.com/subscribe/my-brand`).
 - `theme` & `layout`: JSON payloads that determine how the landing page looks for customers.
 
 ### 5. `payments`

@@ -1,14 +1,14 @@
-# SubTrckr
+# SubDesk
 ### Managing SaaS subscriptions, because tracking things in Excel is a cry for help.
 
-![SubTrckr Hero Banner](file:///C:/Users/ABUZAR/Documents/dbmsProject_Subtracker/Frontend/public/hero.png)
+![SubDesk Hero Banner](file:///C:/Users/ABUZAR/Documents/dbmsProject_Subtracker/Frontend/public/hero.png)
 
 ---
 
 ## Introduction
-SubTrckr is a production-grade SaaS platform built for people who actually want to scale their businesses instead of wrestling with billing logic. We handle the complex stuff—dynamic landing pages, Razorpay integrations, and scary-looking analytics—so you can focus on whatever it is you actually do. 
+SubDesk is a production-grade SaaS platform built for people who actually want to scale their businesses instead of wrestling with billing logic. We handle the complex stuff—dynamic landing pages, Razorpay integrations, and scary-looking analytics—so you can focus on whatever it is you actually do. 
 
-Built with a focus on actual security and performance, SubTrckr manages the entire bridge between you offering value and customers (hopefully) paying for it.
+Built with a focus on actual security and performance, SubDesk manages the entire bridge between you offering value and customers (hopefully) paying for it.
 
 ---
 
@@ -69,7 +69,7 @@ Follows a decoupled architecture, because spaghetti is for dinner, not for your 
 
 ## Database Overview
 
-SubTrckr uses a relational MySQL schema optimized for auditing and chronological tracking.
+SubDesk uses a relational MySQL schema optimized for auditing and chronological tracking.
 
 - **`users`**: The central registry for everyone involved.
 - **`plans`**: Stores tiers with JSON fields for features (because requirements always change).
@@ -183,7 +183,7 @@ PORT=3030
 DB_HOST=localhost
 DB_USER=your_user
 DB_PASSWORD=your_password
-DB_NAME=subtrckrdb
+DB_NAME=subdeskdb
 JWT_SECRET=something_unhackable
 RAZORPAY_KEY_ID=rzp_test_...
 RAZORPAY_KEY_SECRET=...

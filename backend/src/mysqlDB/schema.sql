@@ -1,6 +1,6 @@
--- SubTrckr Database Schema
+-- SubDesk Database Schema
 -- Run this against your MySQL database:
--- mysql -u root -p subtrckrdb < schema.sql
+-- mysql -u root -p subdeskdb < schema.sql
 
 -- Ensure users table has a role column
 -- If your users table already exists, run:

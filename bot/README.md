@@ -1,4 +1,4 @@
-# SubTrckr Subscriber Bot
+# SubDesk Subscriber Bot
 
 This bot automates the process of creating a new customer account and subscribing to a plan. It's useful for testing the Analytics Dashboard.
 

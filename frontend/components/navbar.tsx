@@ -26,7 +26,7 @@ export function Navbar() {
       <div className="flex h-16 items-center justify-between px-4 md:px-8">
         <Link href="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary" />
-          <span className="font-semibold text-foreground">SubTrckr</span>
+          <span className="font-semibold text-foreground">SubDesk</span>
         </Link>
 
         <div className="flex items-center gap-4">

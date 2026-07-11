@@ -45,7 +45,7 @@ function SubscribePageContent() {
   // Listener for live profile updates (from dashboard preview)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'SUBTRCKR_PROFILE_UPDATE' && event.data.payload) {
+      if (event.data && event.data.type === 'SUBDESK_PROFILE_UPDATE' && event.data.payload) {
         setData(prev => prev ? ({
           ...prev,
           business: {
