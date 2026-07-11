@@ -307,10 +307,11 @@ class ApiClient {
 
   // Plans endpoints
   async createPlan(data: Partial<Plan>) {
-    return this.request<Plan>('/plans', {
+    const response = await this.request<{ message: string; plan: Plan }>('/plans', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return response.plan;
   }
 
   async getMyPlans() {
@@ -326,10 +327,11 @@ class ApiClient {
   }
 
   async updatePlan(planId: number, data: Partial<Plan>) {
-    return this.request<Plan>(`/plans/${planId}`, {
+    const response = await this.request<{ message: string; plan: Plan }>(`/plans/${planId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+    return response.plan;
   }
 
   async deletePlan(planId: number) {

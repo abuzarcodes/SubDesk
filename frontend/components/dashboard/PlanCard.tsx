@@ -50,7 +50,7 @@ export function PlanCard({ plan, onEdit, onDelete, compact = false }: PlanCardPr
         {hasDiscount && (
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
             <Tag className="h-3 w-3" />
-            {plan.discount}% off
+            {Number(Number(plan.discount).toFixed(2))}% off
           </span>
         )}
       </div>

@@ -145,8 +145,15 @@ async function updatePlan(req, res) {
       return res.status(404).json({ message: "Plan not found or unauthorized to update" });
     }
 
+    // Fetch the updated plan to return it
+    const [updatedPlans] = await DB.execute(
+      `SELECT id, name, price, billing_cycle, description, features, discount, benefits_available, benefits_not_available, created_at FROM plans WHERE id = ? AND business_id = ?`,
+      [id, req.user.id]
+    );
+
     return res.status(200).json({
       message: "Plan updated successfully",
+      plan: updatedPlans[0],
     });
   } catch (error) {
     console.error(error);

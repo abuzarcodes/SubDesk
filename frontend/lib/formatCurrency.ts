@@ -1,3 +1,6 @@
 export function formatINR(amount: number) {
-  return `₹${amount}`;
+  if (amount % 1 === 0) {
+    return `₹${amount}`;
+  }
+  return `₹${amount.toFixed(2)}`;
 }

@@ -77,7 +77,7 @@ export function PlanCard({ plan, index, config, businessId, isPreview = false }:
             </h3>
             {hasDiscount && (
               <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_oklch,var(--sub-primary)_15%,transparent)] px-2.5 py-1 text-xs font-bold text-[var(--sub-primary)] mt-1">
-                {plan.discount}% OFF
+                {Number(Number(plan.discount).toFixed(2))}% OFF
               </span>
             )}
           </div>

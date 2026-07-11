@@ -18,13 +18,26 @@ dotenv.config();
 const app = express();
 connectDB();
 
-// Middleware
-app.use(
-  cors({
-    origin: "https://subtrckr.vercel.app",
-    credentials: true,
-  }),
-);
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  .split(",")
+  .map(origin => origin.trim());
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests without an Origin header (e.g. Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
+
 // Webhook requires raw body parsing for HMAC signature verification
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
