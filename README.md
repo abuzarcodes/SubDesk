@@ -190,27 +190,6 @@ RAZORPAY_KEY_SECRET=...
 RAZORPAY_WEBHOOK_SECRET=...
 ```
 
----
-
-## Screenshots
-> [!TIP]
-> This is where you'd put images of the app to prove it actually works.
-
-- **[Business Dashboard]**: Numbers going up (hopefully).
-- **[Analytics Page]**: Serious-looking charts for serious people.
-- **[Subscription Page]**: A landing page that doesn't look like it was built in 1999.
-- **[Customer Portal]**: Where people go to manage their lives.
-
----
-
-## Future Roadmap
-- [ ] **Razorpay Route**: Automated commission splits.
-- [ ] **Multi-Currency**: For when your business goes global.
-- [ ] **Coupon System**: Giving things away for free, but strategically.
-- [ ] **Real-time Notifications**: Emails for when things happen.
-- [ ] **Advanced Admin Panel**: For the person in charge.
-
----
 
 ## License
-Distributed under the MIT License. Use it, just don't blame us for anything.
+Distributed under the MIT License.
