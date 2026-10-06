@@ -2,7 +2,7 @@
 
 ### A Comprehensive SaaS Subscription Management Platform
 
-![SubDesk Hero Banner](./Frontend/public/Hero.png)
+![SubDesk Hero Banner](./frontend/public/Hero.png)
 
 ---
 
